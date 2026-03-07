@@ -1,21 +1,18 @@
-import { useEffect, useState } from 'react';
-import NxWelcome from './nx-welcome';
+import { Card, Error, Input, Modal, NotFound, Empty } from '@message-management/shared/ui'
 
 export function App() {
-  let [data,setData] = useState<string | null>(null)
-
-  useEffect(()=>{
-    const fetchedData = fetch('http://localhost:3000/api')
-    fetchedData.then((res) => res.json()).then(rawData => {
-      setData(rawData.message)
-      console.log(data);
-    })
-  },[])
-
   return (
     <div>
-      <NxWelcome title="web" />
-      <p className='text-red-500 font-bold text-center'>Hello from server {data}</p>
+      {/* <NotFound></NotFound> */}
+      {/* <form action="" className=" flex flex-col justify-center items-center">
+        <Input label='Email'/>
+      <Input label='Invalid email' errorMessage='Email has to have at least 1 @ symbol'/>
+      </form> */}
+      {/* <Card header={<p>Lorem ipsum dolor sit amet.</p>}>
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, iure?</p>
+      </Card> */}
+      {/* <Error /> */}
+      {/* <Empty /> */}
     </div>
   );
 }
