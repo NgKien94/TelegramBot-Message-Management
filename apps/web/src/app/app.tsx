@@ -1,4 +1,6 @@
-import { Card, Error, Input, Modal, NotFound, Empty } from '@message-management/shared/ui'
+import { Empty } from "@message-management/shared/ui";
+import Login from "../pages/Auth/Login";
+
 
 export function App() {
   return (
@@ -13,6 +15,7 @@ export function App() {
       </Card> */}
       {/* <Error /> */}
       {/* <Empty /> */}
+      {/* <Login /> */}
     </div>
   );
 }

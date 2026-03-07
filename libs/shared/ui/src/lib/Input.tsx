@@ -19,7 +19,7 @@ export function Input({
   ...rest
 }: InputProps) {
   return (
-    <div className={clsx('w-9/12', className)}>
+    <div className={clsx('w-full', className)}>
       <label htmlFor={id} className="block mb-1 font-semibold text-sm">
         {label}
       </label>
