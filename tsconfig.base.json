@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@message-management/ui": ["libs/ui/src/index.ts"]
+      "@message-management/shared/ui": ["libs/shared/ui/src/index.ts"]
     },
     "esModuleInterop": true
   },
