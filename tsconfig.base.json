@@ -17,7 +17,9 @@
     "paths": {
       "@message-management/shared/ui": ["libs/shared/ui/src/index.ts"],
       "@message-management/client": ["libs/client/src/index.ts"],
-      "@message-management/db": ["libs/db/src/index.ts"]
+      "@message-management/db": ["libs/db/src/index.ts"],
+      "@message-management/types": ["libs/shared/types/src/index.ts"],
+      "@message-management/utils": ["libs/shared/utils/src/index.ts"]
     },
     "esModuleInterop": true
   },
