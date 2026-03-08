@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma generate --schema=libs/db/src/prisma/schema.prisma
+// npx prisma db push --schema=libs/db/src/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String @unique
+  password String
+
+  @@map("accounts")
+}
+
+model AuthToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  accountId String @db.ObjectId
+  refresh_token String
+
+  @@index([accountId,refresh_token])
+  @@map("authtokens")
+}
+
+model TelegramUser {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  telegramID String @unique
+  firstName String
+  lastName String
+  avatarUrl String
+
+  // relation
+  conversation Conversation?
+
+  @@map("telegramusers")
+}
+
+model WelcomeMessage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  value String
+
+  @@map("welcomemessage")
+}
+
+model Conversation {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId @unique
+  status ConversationStatus @default(OPEN)
+  isReadByAdmin Boolean @default(false)
+  lastMessageId String @db.ObjectId
+  lastMessageAt DateTime
+  createdAt DateTime
+  updatedAt DateTime
+
+  // relation
+  messages Message[]
+  telegramUser TelegramUser @relation(fields: [userId],references: [id])
+
+  @@map("conversations")
+}
+
+model Message {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  fileUrl String?
+  fileName String?
+  content String?
+  type MessageType @default(TEXT)
+  senderType SenderType
+  sentByAdmin Boolean
+  conversationId String @db.ObjectId
+  createdAt DateTime
+
+  // relation
+  conversation Conversation @relation(fields: [conversationId],references: [id])
+
+  @@map("messages")
+}
+
+enum ConversationStatus {
+  OPEN @map("open")
+  CLOSED @map("closed")
+}
+
+enum MessageType {
+  TEXT @map("text")
+  FILE @map("file")
+}
+
+enum SenderType {
+  INCOMING @map("incoming")
+  OUTGOING @map("outgoing")
+}
