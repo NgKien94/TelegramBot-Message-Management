@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@message-management/shared/ui": ["libs/shared/ui/src/index.ts"],
-      "@message-management/client": ["libs/client/src/index.ts"]
+      "@message-management/client": ["libs/client/src/index.ts"],
+      "@message-management/db": ["libs/db/src/index.ts"]
     },
     "esModuleInterop": true
   },
