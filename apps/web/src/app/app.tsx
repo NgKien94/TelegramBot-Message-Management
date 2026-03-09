@@ -1,11 +1,8 @@
-import Login from "../pages/Auth/Login";
-
+import { Outlet } from 'react-router-dom';
 
 export function App() {
   return (
-    <div>
-      <Login />
-    </div>
+    <Outlet />
   );
 }
 
