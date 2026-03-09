@@ -1,6 +1,10 @@
+import ConversationContent from "../../components/Conversation/ConversationContent";
+
 export default function ConversationDetail() {
   return (
-    <div>ConversationDetail</div>
+    <div>
+      <ConversationContent />
+    </div>
   )
 }
 
