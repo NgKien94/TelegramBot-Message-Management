@@ -4,10 +4,10 @@ import { Theme } from '@radix-ui/themes';
 export function App() {
   return (
     <Theme
-      // style={{
-      //   fontFamily:
-      //     "'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif",
-      // }}
+      style={{
+        fontFamily:
+          "'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif",
+      }}
     >
       {/* <TaskDashboard></TaskDashboard> */}
       <Outlet />
