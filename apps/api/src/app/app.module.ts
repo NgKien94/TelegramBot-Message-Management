@@ -15,6 +15,7 @@ import { AuthModule } from '../modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { MyTransformInterceptor } from '../core/interceptors/transform.interceptor';
+import { TelegramModule } from '../modules/telegram-bot/telegram.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MyTransformInterceptor } from '../core/interceptors/transform.intercept
     PrismaModule,
     AuthModule,
     JwtModule,
+    TelegramModule
   ],
   controllers: [AppController],
   providers: [

@@ -59,10 +59,10 @@ model Conversation {
   userId String @db.ObjectId @unique
   status ConversationStatus @default(OPEN)
   isReadByAdmin Boolean @default(false)
-  lastMessageId String @db.ObjectId
-  lastMessageAt DateTime
-  createdAt DateTime
-  updatedAt DateTime
+  lastMessageId String? @db.ObjectId
+  lastMessageAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   // relation
   messages Message[]
@@ -80,7 +80,7 @@ model Message {
   senderType SenderType
   sentByAdmin Boolean
   conversationId String @db.ObjectId
-  createdAt DateTime
+  createdAt DateTime @default(now())
 
   // relation
   conversation Conversation @relation(fields: [conversationId],references: [id])
