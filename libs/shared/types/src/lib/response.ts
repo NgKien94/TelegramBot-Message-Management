@@ -31,3 +31,11 @@ export type ApiDataForClient<T> = {
   result: T
   meta?: PaginationMeta
 }
+
+export type ApiErrorForClient = {
+  success: boolean
+  error: {
+    message: string
+    statusCode: number
+  }
+}
