@@ -36,6 +36,7 @@ model AuthToken {
 model TelegramUser {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   telegramID String @unique
+  username String
   firstName String
   lastName String
   avatarUrl String
