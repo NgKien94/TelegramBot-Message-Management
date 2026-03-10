@@ -1,5 +1,7 @@
-import { Outlet } from 'react-router-dom';
 import { Theme } from '@radix-ui/themes';
+import { Outlet } from 'react-router-dom';
+
+
 
 export function App() {
   return (
@@ -9,7 +11,6 @@ export function App() {
           "'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif",
       }}
     >
-      {/* <TaskDashboard></TaskDashboard> */}
       <Outlet />
     </Theme>
   );
