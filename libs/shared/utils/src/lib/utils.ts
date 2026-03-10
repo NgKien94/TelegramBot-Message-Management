@@ -1,6 +1,6 @@
-import { ApiResponse, ValidationErrorResponse } from "@message-management/types";
+import { ApiResponseFromServer, ValidationErrorResponse } from "@message-management/types";
 
-export const isApiResponse = <T>(value: unknown): value is ApiResponse<T> => {
+export const isApiResponseFromServer = <T>(value: unknown): value is ApiResponseFromServer<T> => {
   return (
     typeof value === 'object' &&
     value !== null &&

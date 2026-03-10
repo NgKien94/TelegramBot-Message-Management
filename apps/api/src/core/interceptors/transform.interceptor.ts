@@ -6,22 +6,22 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from "@message-management/types";
-import { isApiResponse } from '@message-management/utils';
+import { ApiResponseFromServer } from "@message-management/types";
+import { isApiResponseFromServer } from '@message-management/utils';
 
 
 @Injectable()
 export class MyTransformInterceptor<T> implements NestInterceptor<
   T,
-  ApiResponse<T>
+  ApiResponseFromServer<T>
 > {
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
-  ): Observable<ApiResponse<T>> {
+  ): Observable<ApiResponseFromServer<T>> {
     return next.handle().pipe(
-      map((dataRaw): ApiResponse<T> => {
-        if (isApiResponse<T>(dataRaw)) {
+      map((dataRaw): ApiResponseFromServer<T> => {
+        if (isApiResponseFromServer<T>(dataRaw)) {
           return dataRaw;
         }
 

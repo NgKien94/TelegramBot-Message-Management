@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ApiResponse, HttpMessage } from '@message-management/types';
+import { ApiResponseFromServer, HttpMessage } from '@message-management/types';
 import { isValidationErrorResponse } from '@message-management/utils'
 
 @Catch()
@@ -22,7 +22,7 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
-    const responseBody: ApiResponse<never> = {
+    const responseBody: ApiResponseFromServer<never> = {
       success: false,
       error: {
         message: HttpMessage.INTERNAL_SERVER_ERROR,
