@@ -44,7 +44,7 @@ export type ApiErrorForClient = {
 export type Conversation = {
   id: string;
   status: string;
-  isReadByAdmin: string;
+  isReadByAdmin: boolean;
   telegramUser: TelegramUser;
   lastMessage: {
     id: string;
@@ -76,9 +76,9 @@ export type Messages = {
 };
 
 export type TelegramUser = {
-  telegramId: string;
-  username: string;
+  telegramID: string;
   firstName: string;
-  lastName: string;
-  avatarUrl: string;
+  username?: string;
+  lastName?: string;
+  avatarUrl?: string;
 };

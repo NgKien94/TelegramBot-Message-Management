@@ -2,6 +2,7 @@ import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
 import { UpdateConversationDto } from './conversation.dto';
+import { Conversation } from '@message-management/types';
 
 @Injectable()
 export class ConversationService {
@@ -13,11 +14,9 @@ export class ConversationService {
       //   status: 'OPEN'
       // }
       include: {
-        telegramUser: true
+        telegramUser: true,
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: [{ lastMessageAt: 'desc' }, { updatedAt: 'desc' }],
     });
 
     const listMessageId = conversations.map((item) => item.lastMessageId);
@@ -38,6 +37,28 @@ export class ConversationService {
       };
     });
     return result;
+  }
+
+  async getDetailConversation(conversationId: string) {
+    const conversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+      include: {
+        telegramUser: true,
+      },
+    });
+
+    const lastMessage = await this.prismaService.message.findUnique({
+      where: {
+        id: conversation.lastMessageId,
+      },
+    });
+
+    return {
+      lastMessage,
+      ...conversation,
+    };
   }
 
   async getOrCreateConversation(userId: string) {
@@ -111,18 +132,18 @@ export class ConversationService {
 
     const result = await this.prismaService.conversation.findUnique({
       where: {
-        id: conversationId
+        id: conversationId,
       },
       include: {
         telegramUser: true,
         messages: {
           orderBy: {
-            createdAt: 'asc'
-          }
-        }
-      }
-    })
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
 
-    return result
+    return result;
   }
 }

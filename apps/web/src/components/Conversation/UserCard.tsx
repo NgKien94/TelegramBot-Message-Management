@@ -15,7 +15,7 @@ export default function UserCard({
         src={user.avatarUrl}
         alt={`${user.lastName} ${user.firstName}`}
       />
-      <p className="text-sm font-semibold">{user.lastName}{' '}{user.firstName}</p>
+      <p className="text-sm font-semibold">{user.firstName}{' '}{user.lastName || ''}</p>
     </div>
   );
 }

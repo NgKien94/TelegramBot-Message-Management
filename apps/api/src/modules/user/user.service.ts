@@ -30,7 +30,7 @@ export class UserService {
         username: payload.username,
         firstName: payload.firstname,
         lastName: payload.lastname,
-        avatarUrl: payload.avatarUrl
+        avatarUrl: payload.avatarUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_nLCu85ayoTKwYw6alnvrockq5QBT2ZWR2g&s'
       }
     })
 

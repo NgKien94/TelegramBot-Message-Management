@@ -17,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MyTransformInterceptor } from '../core/interceptors/transform.interceptor';
 import { TelegramModule } from '../modules/telegram-bot/telegram.module';
 import { ConversationModule } from '../modules/conversation/conversation.module';
+import { SocketModule } from '../modules/socket/socket.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { ConversationModule } from '../modules/conversation/conversation.module'
     AuthModule,
     JwtModule,
     TelegramModule,
-    ConversationModule
+    ConversationModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [
