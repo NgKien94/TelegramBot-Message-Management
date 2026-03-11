@@ -1,13 +1,38 @@
 import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
-import {
-  UpdateConversationDto,
-} from './conversation.dto';
+import { UpdateConversationDto } from './conversation.dto';
 
 @Injectable()
 export class ConversationService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  async getConversationsList() {
+    const conversations = await this.prismaService.conversation.findMany({
+      // where: {
+      //   status: 'OPEN'
+      // }
+    });
+
+    const listMessageId = conversations.map((item) => item.lastMessageId);
+
+    const messages = await this.prismaService.message.findMany({
+      where: {
+        id: { in: listMessageId },
+      },
+    });
+
+    const mapMessages = new Map(
+      messages.map((message) => [message.id, message]),
+    );
+    const result = conversations.map((conversation) => {
+      return {
+        ...conversation,
+        lastMessage: mapMessages.get(conversation.lastMessageId),
+      };
+    });
+    return result;
+  }
 
   async getOrCreateConversation(userId: string) {
     const isExistConversationWithUser =
@@ -23,7 +48,7 @@ export class ConversationService {
       return isExistConversationWithUser;
     }
 
-   const newConversation = await this.prismaService.conversation.create({
+    const newConversation = await this.prismaService.conversation.create({
       data: {
         userId,
         status: 'OPEN',
@@ -33,7 +58,7 @@ export class ConversationService {
 
     // console.log("New conversation: ", newConversation);
 
-    return newConversation
+    return newConversation;
   }
 
   async updateConversation(
@@ -64,5 +89,34 @@ export class ConversationService {
         updatedAt: new Date(),
       },
     });
+  }
+
+  async getChatHistoryOfConversation(conversationId: string) {
+    const isExistConversation =
+      await this.prismaService.conversation.findUnique({
+        where: {
+          id: conversationId,
+        },
+      });
+
+    if (!isExistConversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    const result = await this.prismaService.conversation.findMany({
+      where: {
+        id: conversationId
+      },
+      include: {
+        telegramUser: true,
+        messages: {
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
+      }
+    })
+
+    return result
   }
 }
