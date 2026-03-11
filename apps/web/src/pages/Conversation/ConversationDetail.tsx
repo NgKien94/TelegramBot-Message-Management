@@ -1,10 +1,11 @@
-import ConversationContent from "../../components/Conversation/ConversationContent";
+import { useParams } from 'react-router-dom';
+import ConversationContent from '../../components/Conversation/ConversationContent';
 
 export default function ConversationDetail() {
+  const { id } = useParams<{ id: string }>();
   return (
     <div>
-      <ConversationContent />
+      <ConversationContent conversationId={id} />
     </div>
-  )
+  );
 }
-

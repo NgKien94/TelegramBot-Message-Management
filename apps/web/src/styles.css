@@ -9,4 +9,5 @@
 html {
   --primary-color: #13397D;
   font-family: 'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  overflow-y: hidden;
 }

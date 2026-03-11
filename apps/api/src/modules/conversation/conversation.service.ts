@@ -12,6 +12,12 @@ export class ConversationService {
       // where: {
       //   status: 'OPEN'
       // }
+      include: {
+        telegramUser: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
     const listMessageId = conversations.map((item) => item.lastMessageId);
@@ -103,7 +109,7 @@ export class ConversationService {
       throw new NotFoundException('Conversation not found');
     }
 
-    const result = await this.prismaService.conversation.findMany({
+    const result = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId
       },
