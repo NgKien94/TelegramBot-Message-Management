@@ -20,7 +20,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // bot onListener handlers
     this.botOnListenHandler();
 
-    await this.bot.launch({
+    this.bot.launch({
       dropPendingUpdates: true, // don't handle message when bot offline
     });
 
