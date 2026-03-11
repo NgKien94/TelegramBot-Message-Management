@@ -1,3 +1,4 @@
+// ============COMMON==============
 export type PaginationMeta = {
   totalRecord: number;
   totalPages: number;
@@ -26,16 +27,58 @@ export type ValidationErrorResponse = {
   statusCode: number;
 };
 
-
 export type ApiDataForClient<T> = {
-  result: T
-  meta?: PaginationMeta
-}
+  result: T;
+  meta?: PaginationMeta;
+};
 
 export type ApiErrorForClient = {
-  success: boolean
+  success: boolean;
   error: {
-    message: string
-    statusCode: number
-  }
-}
+    message: string;
+    statusCode: number;
+  };
+};
+
+// ==============CONVERSATION===============
+export type Conversation = {
+  id: string;
+  status: string;
+  isReadByAdmin: string;
+  telegramUser: TelegramUser;
+  lastMessage: {
+    id: string;
+    content: string;
+    type: string;
+    sentbyAdmin: boolean;
+    senderType: string;
+  };
+  lastMessageAt: string;
+};
+
+export type ChatHistoryOfConversation = {
+  id: string;
+  telegramUser: TelegramUser;
+  messages: Messages[];
+};
+
+// ==============MESSAGES==============
+export type Messages = {
+  id: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  content: string | undefined;
+  type: string;
+  senderType: string;
+  sentByAdmin: boolean;
+  conversationId: string;
+  createdAt: string;
+};
+
+export type TelegramUser = {
+  telegramId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+};
