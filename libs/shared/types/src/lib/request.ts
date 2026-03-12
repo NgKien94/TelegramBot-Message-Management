@@ -1,4 +1,6 @@
-// AUTH
+// =================AUTH================
+
+import { MessageType, SenderType } from "./enum"
 
 export type LoginRequest = {
   email: string
@@ -17,4 +19,15 @@ export type LogoutRequest = {
 
 export type RefreshTokenRequest = {
   token: string // refresh_token
+}
+
+// =================MESSAGE================
+export type CreateMessageRequest = {
+  fileUrl ?: string
+  fileName ?: string
+  content ?: string
+  type ?: MessageType
+  senderType : SenderType
+  sentByAdmin : boolean
+  conversationId : string
 }

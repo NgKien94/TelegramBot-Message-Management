@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
@@ -7,12 +7,15 @@ import { getChatHistoryOfConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
 import { socket } from '../../socket';
 import { ApiDataForClient, ChatHistoryOfConversation, Messages } from '@message-management/types';
+import { ConversationIdContext } from '../../contexts/conversation.context';
 
-interface ConversationContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  conversationId?: string;
-}
+// interface ConversationContentProps extends React.HTMLAttributes<HTMLDivElement> {
+//   conversationId?: string;
+// }
 
-export default function ConversationContent({ conversationId }: ConversationContentProps) {
+export default function ConversationContent() {
+  const conversationId = useContext(ConversationIdContext)
+
   const queryClient = useQueryClient();
   const { isSuccess, isError, data } = useQuery({
     queryKey: ['chat-history', conversationId],
@@ -21,7 +24,6 @@ export default function ConversationContent({ conversationId }: ConversationCont
   });
 
   const historyRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;

@@ -105,4 +105,34 @@ export class ChatService {
       { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
     ]);
   }
+
+  async handleSendMessageToTelegramUser(messageId: string) {
+    const message = await this.messageService.getMessageDetail(messageId);
+
+    // update conversation
+    await this.conversationService.updateConversation(message.conversationId, {
+      lastMessageId: message.id,
+      lastMessageAt: new Date(),
+    });
+
+    const detailConversation = await this.conversationService.getDetailConversation(message.conversationId);
+
+    // emit socket event for web frontend to realtime conversation
+    this.socketGateway.socketHandleUpdateConversation({
+      id: detailConversation.id,
+      telegramUser: detailConversation.telegramUser,
+      isReadByAdmin: detailConversation.isReadByAdmin,
+      lastMessage: {
+        ...detailConversation.lastMessage,
+        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+      },
+      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
+      status: detailConversation.status,
+    });
+
+    // emit socket event for web frontend to realtime chat history
+    this.socketGateway.socketHandleUpdateChatHistory([
+      { ...message, createdAt: message.createdAt.toISOString() },
+    ]);
+  }
 }
