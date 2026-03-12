@@ -9,36 +9,42 @@ interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   setConversation: Dispatch<SetStateAction<string | undefined>>;
 }
 
-export default function ConversationList({
-  setConversation,
-  ...rest
-}: ConversationListProps) {
+export default function ConversationList({ setConversation, ...rest }: ConversationListProps) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    socket.on(
-      'conversation_updated',
-      (payload: { conversation: Conversation }) => {
-        queryClient.setQueryData(
-          ['conversation-list'],
-          (oldData: ApiDataForClient<Conversation[]>) => {
-            if (!oldData) return { result: [payload.conversation] };
-            return {
-              result: [
-                payload.conversation,
-                ...oldData.result.filter(
-                  (c) => c.id !== payload.conversation.id,
-                ),
-              ],
-            };
-          },
-        );
+    const handlerConversationList = (payload: { conversation: Conversation }) => {
+      queryClient.setQueryData(['conversation-list'], (oldData: ApiDataForClient<Conversation[]>) => {
+        if (!oldData) return { result: [payload.conversation] };
+        return {
+          result: [payload.conversation, ...oldData.result.filter((c) => c.id !== payload.conversation.id)],
+        };
+      });
+    };
+    socket.on('conversation_updated', handlerConversationList);
+    //  socket.on(
+    //     'conversation_updated',
+    //     (payload: { conversation: Conversation }) => {
+    //       queryClient.setQueryData(
+    //         ['conversation-list'],
+    //         (oldData: ApiDataForClient<Conversation[]>) => {
+    //           if (!oldData) return { result: [payload.conversation] };
+    //           return {
+    //             result: [
+    //               payload.conversation,
+    //               ...oldData.result.filter(
+    //                 (c) => c.id !== payload.conversation.id,
+    //               ),
+    //             ],
+    //           };
+    //         },
+    //       );
 
-        console.log('cache:', queryClient.getQueryData(['conversation-list']));
-      },
-    );
+    //       console.log('cache:', queryClient.getQueryData(['conversation-list']));
+    //     },
+    //   );
     return () => {
-      socket.off();
+      socket.off('conversation_updated', handlerConversationList);
     };
   }, [queryClient]);
 

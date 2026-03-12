@@ -20,7 +20,7 @@ export class ChatService {
     const conversation = await this.conversationService.getOrCreateConversation(userId);
     // console.log('Handle start conversation: ', newConversation);
     // add message from Telegram user into conversation
-    await this.messageService.addMessageIntoConversation(conversation.id, {
+    const userMessage = await this.messageService.addMessageIntoConversation(conversation.id, {
       content: '/start',
       type: MessageType.TEXT,
       senderType: SenderType.INCOMING,
@@ -57,6 +57,12 @@ export class ChatService {
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
     });
+
+    // emit socket event for web frontend to realtime chat history
+    this.socketGateway.socketHandleUpdateChatHistory([
+      { ...userMessage, createdAt: userMessage.createdAt.toISOString() },
+      { ...botMessage, createdAt: botMessage.createdAt.toISOString() },
+    ]);
   }
 
   async handleTelegramUserSendMessage(userId: string, content: string) {
@@ -93,5 +99,10 @@ export class ChatService {
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
     });
+
+    // emit socket event for web frontend to realtime chat history
+    this.socketGateway.socketHandleUpdateChatHistory([
+      { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
+    ]);
   }
 }
