@@ -22,27 +22,6 @@ export default function ConversationList({ setConversation, ...rest }: Conversat
       });
     };
     socket.on('conversation_updated', handlerConversationList);
-    //  socket.on(
-    //     'conversation_updated',
-    //     (payload: { conversation: Conversation }) => {
-    //       queryClient.setQueryData(
-    //         ['conversation-list'],
-    //         (oldData: ApiDataForClient<Conversation[]>) => {
-    //           if (!oldData) return { result: [payload.conversation] };
-    //           return {
-    //             result: [
-    //               payload.conversation,
-    //               ...oldData.result.filter(
-    //                 (c) => c.id !== payload.conversation.id,
-    //               ),
-    //             ],
-    //           };
-    //         },
-    //       );
-
-    //       console.log('cache:', queryClient.getQueryData(['conversation-list']));
-    //     },
-    //   );
     return () => {
       socket.off('conversation_updated', handlerConversationList);
     };

@@ -29,7 +29,7 @@ export default function ConversationContent({ conversationId }: ConversationCont
   }, [data]);
 
   useEffect(() => {
-    console.log(queryClient.getQueryData(['chat-history', conversationId]));
+    // console.log(queryClient.getQueryData(['chat-history', conversationId]));
     const conversationContentHandler = (payload: { newMessages: Messages[] }) => {
       queryClient.setQueryData(
         ['chat-history', conversationId],
@@ -47,9 +47,6 @@ export default function ConversationContent({ conversationId }: ConversationCont
       );
     };
 
-    // socket.on('new_messages', (payload: Messages) => {
-    //   console.log(payload);
-    // })
     socket.on('new_messages', conversationContentHandler);
 
     return () => {
