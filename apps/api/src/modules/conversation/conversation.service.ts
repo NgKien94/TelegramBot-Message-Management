@@ -13,11 +13,9 @@ export class ConversationService {
       //   status: 'OPEN'
       // }
       include: {
-        telegramUser: true
+        telegramUser: true,
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: [{ lastMessageAt: 'desc' }, { updatedAt: 'desc' }],
     });
 
     const listMessageId = conversations.map((item) => item.lastMessageId);
@@ -28,9 +26,7 @@ export class ConversationService {
       },
     });
 
-    const mapMessages = new Map(
-      messages.map((message) => [message.id, message]),
-    );
+    const mapMessages = new Map(messages.map((message) => [message.id, message]));
     const result = conversations.map((conversation) => {
       return {
         ...conversation,
@@ -40,13 +36,34 @@ export class ConversationService {
     return result;
   }
 
+  async getDetailConversation(conversationId: string) {
+    const conversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+      include: {
+        telegramUser: true,
+      },
+    });
+
+    const lastMessage = await this.prismaService.message.findUnique({
+      where: {
+        id: conversation.lastMessageId,
+      },
+    });
+
+    return {
+      lastMessage,
+      ...conversation,
+    };
+  }
+
   async getOrCreateConversation(userId: string) {
-    const isExistConversationWithUser =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          userId,
-        },
-      });
+    const isExistConversationWithUser = await this.prismaService.conversation.findUnique({
+      where: {
+        userId,
+      },
+    });
 
     if (isExistConversationWithUser) {
       // // User has had a conversation
@@ -67,16 +84,12 @@ export class ConversationService {
     return newConversation;
   }
 
-  async updateConversation(
-    conversationId: string,
-    payload: UpdateConversationDto,
-  ) {
-    const isExistConversation =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          id: conversationId,
-        },
-      });
+  async updateConversation(conversationId: string, payload: UpdateConversationDto) {
+    const isExistConversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
 
     if (!isExistConversation) {
       throw new NotFoundException('Conversation not found');
@@ -98,12 +111,11 @@ export class ConversationService {
   }
 
   async getChatHistoryOfConversation(conversationId: string) {
-    const isExistConversation =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          id: conversationId,
-        },
-      });
+    const isExistConversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
 
     if (!isExistConversation) {
       throw new NotFoundException('Conversation not found');
@@ -111,18 +123,18 @@ export class ConversationService {
 
     const result = await this.prismaService.conversation.findUnique({
       where: {
-        id: conversationId
+        id: conversationId,
       },
       include: {
         telegramUser: true,
         messages: {
           orderBy: {
-            createdAt: 'asc'
-          }
-        }
-      }
-    })
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
 
-    return result
+    return result;
   }
 }
