@@ -2,7 +2,6 @@ import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
 import { UpdateConversationDto } from './conversation.dto';
-import { Conversation } from '@message-management/types';
 
 @Injectable()
 export class ConversationService {
@@ -27,9 +26,7 @@ export class ConversationService {
       },
     });
 
-    const mapMessages = new Map(
-      messages.map((message) => [message.id, message]),
-    );
+    const mapMessages = new Map(messages.map((message) => [message.id, message]));
     const result = conversations.map((conversation) => {
       return {
         ...conversation,
@@ -62,12 +59,11 @@ export class ConversationService {
   }
 
   async getOrCreateConversation(userId: string) {
-    const isExistConversationWithUser =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          userId,
-        },
-      });
+    const isExistConversationWithUser = await this.prismaService.conversation.findUnique({
+      where: {
+        userId,
+      },
+    });
 
     if (isExistConversationWithUser) {
       // // User has had a conversation
@@ -88,16 +84,12 @@ export class ConversationService {
     return newConversation;
   }
 
-  async updateConversation(
-    conversationId: string,
-    payload: UpdateConversationDto,
-  ) {
-    const isExistConversation =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          id: conversationId,
-        },
-      });
+  async updateConversation(conversationId: string, payload: UpdateConversationDto) {
+    const isExistConversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
 
     if (!isExistConversation) {
       throw new NotFoundException('Conversation not found');
@@ -119,12 +111,11 @@ export class ConversationService {
   }
 
   async getChatHistoryOfConversation(conversationId: string) {
-    const isExistConversation =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          id: conversationId,
-        },
-      });
+    const isExistConversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
 
     if (!isExistConversation) {
       throw new NotFoundException('Conversation not found');

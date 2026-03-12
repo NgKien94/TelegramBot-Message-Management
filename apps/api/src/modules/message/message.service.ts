@@ -6,16 +6,12 @@ import { CreateMessageDto } from './message.dto';
 export class MessageService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async addMessageIntoConversation(
-    conversationId: string,
-    payload: CreateMessageDto,
-  ) {
-    const isExistConversation =
-      await this.prismaService.conversation.findUnique({
-        where: {
-          id: conversationId,
-        },
-      });
+  async addMessageIntoConversation(conversationId: string, payload: CreateMessageDto) {
+    const isExistConversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
 
     if (!isExistConversation) {
       throw new NotFoundException('Conversation not found');
