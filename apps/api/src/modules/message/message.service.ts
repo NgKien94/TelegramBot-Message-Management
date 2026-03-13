@@ -33,7 +33,7 @@ export class MessageService {
       },
     });
 
-    if (message.senderType === 'OUTGOING') {
+    if (message.senderType === 'OUTGOING' && message.sentByAdmin === true) {
       // emit event messageId, telegramId for telegram service to send message to Telegram user
       this.eventMitter.emit('message.outgoing.created', {
         messageId: message.id,

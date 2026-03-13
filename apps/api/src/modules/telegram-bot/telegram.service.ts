@@ -42,11 +42,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
     this.bot.start(async (ctx) => {
       ctx.reply(WELCOME_MESSAGE);
-      // console.log('Info: ', ctx.from);
+
       const { id, username, first_name, last_name } = ctx.from;
 
       const telegramUserAvatar = await this.getAvatarTelegramUser(ctx.from.id);
-      // console.log(telegramUserAvatar);
+      // // console.log(telegramUserAvatar);
 
       const telegramUser = await this.userService.createUser({
         username,
@@ -62,6 +62,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private async botListenMessage() {
     this.bot.on(message('text'), async (ctx) => {
+      console.log('Text ');
       const { id, username, first_name, last_name } = ctx.from;
       // get message (ctx.message.text)
       const content = ctx.message.text;
