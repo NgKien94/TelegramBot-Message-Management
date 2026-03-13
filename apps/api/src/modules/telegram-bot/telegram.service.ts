@@ -4,6 +4,7 @@ import { Telegraf } from 'telegraf';
 import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -32,7 +33,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private botOnListenHandler() {
     this.botOnStart();
-    this.botListenMessage()
+    this.botListenMessage();
   }
 
   private async botOnStart() {
@@ -55,10 +56,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         avatarUrl: telegramUserAvatar,
       });
 
-      await this.chatService.handleStartConversation(
-        telegramUser.id,
-        WELCOME_MESSAGE,
-      );
+      await this.chatService.handleStartConversation(telegramUser.id, WELCOME_MESSAGE);
     });
   }
 
@@ -69,37 +67,27 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const content = ctx.message.text;
 
       // update user (username, first_name, last_name)
-     const updatedUser = await this.userService.updateUserByTelegramId(String(id), {
+      const updatedUser = await this.userService.updateUserByTelegramId(String(id), {
         username,
         firstname: first_name,
         lastname: last_name,
       });
 
-      await this.chatService.handleTelegramUserSendMessage(updatedUser.id,content)
+      await this.chatService.handleTelegramUserSendMessage(updatedUser.id, content);
     });
   }
 
-  private async getAvatarTelegramUser(
-    telegramId: number,
-  ): Promise<string | undefined> {
+  private async getAvatarTelegramUser(telegramId: number): Promise<string | undefined> {
     try {
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout')), 2000),
-      );
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
 
-      const photos = (await Promise.race([
-        this.bot.telegram.getUserProfilePhotos(telegramId),
-        timeout,
-      ])) as any;
+      const photos = (await Promise.race([this.bot.telegram.getUserProfilePhotos(telegramId), timeout])) as any;
       if (!photos.total_count) {
         return undefined;
       }
 
       const fileId = photos.photos[0].at(-1).file_id;
-      const file = (await Promise.race([
-        this.bot.telegram.getFile(fileId),
-        timeout,
-      ])) as any;
+      const file = (await Promise.race([this.bot.telegram.getFile(fileId), timeout])) as any;
 
       const avatarUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
       return avatarUrl;
@@ -107,6 +95,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       console.log('Error from Telegram API: ', error);
       return undefined;
     }
+  }
+
+  @OnEvent('message.outgoing.created')
+  async sendMessageToTelegramUser(payload: { messageId: string; content: string; telegramId: string }) {
+    await this.bot.telegram.sendMessage(payload.telegramId, payload.content);
+
+    await this.chatService.handleSendMessageToTelegramUser(payload.messageId);
   }
 
   async onModuleDestroy() {

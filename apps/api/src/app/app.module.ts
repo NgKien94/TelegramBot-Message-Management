@@ -18,6 +18,7 @@ import { MyTransformInterceptor } from '../core/interceptors/transform.intercept
 import { TelegramModule } from '../modules/telegram-bot/telegram.module';
 import { ConversationModule } from '../modules/conversation/conversation.module';
 import { SocketModule } from '../modules/socket/socket.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SocketModule } from '../modules/socket/socket.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
     JwtModule,

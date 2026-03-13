@@ -1,4 +1,4 @@
-import { Conversation } from '@message-management/types';
+import { Conversation, Messages } from '@message-management/types';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -27,5 +27,11 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('conversation_updated', {
       conversation: conversationData,
     });
+  }
+
+  socketHandleUpdateChatHistory(messages: Messages[]) {
+    this.server.emit('new_messages',{
+      newMessages: messages
+    })
   }
 }
