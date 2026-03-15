@@ -75,6 +75,7 @@ export type Messages = {
   createdAt: string;
 };
 
+// ============== Users=================
 export type TelegramUser = {
   telegramID: string;
   firstName: string;
