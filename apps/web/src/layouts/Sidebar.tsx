@@ -1,6 +1,5 @@
 import { HiUserGroup } from "react-icons/hi2";
 import { BsChatSquareQuoteFill } from "react-icons/bs";
-import { VscSettingsGear } from "react-icons/vsc";
 import { TbSettings2 } from "react-icons/tb";
 
 import { Link } from "react-router-dom";
