@@ -62,4 +62,13 @@ export class UserService {
 
     return user;
   }
+
+  async getUsers() {
+    const users = await this.prismaService.telegramUser.findMany({
+      include: {
+        conversation: true
+      }
+    })
+    return users
+  }
 }
