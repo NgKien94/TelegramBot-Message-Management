@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
 import { MessageService } from '../message/message.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { MessageType, SenderType } from '@message-management/types';
+import { ConversationStatus, MessageType, SenderType } from '@message-management/types';
 import { SocketGateway } from '../socket/socket.gateway';
 
 @Injectable()
@@ -40,6 +40,7 @@ export class ChatService {
     // update conversation (lastMessage)
     await this.conversationService.updateConversation(conversation.id, {
       isReadByAdmin: false, // Admin don't send message => conversation status is UNREAD
+      status: ConversationStatus.OPEN,
       lastMessageId: botMessage.id,
       lastMessageAt: new Date(),
     });
@@ -82,6 +83,7 @@ export class ChatService {
     // update conversation
     await this.conversationService.updateConversation(conversation.id, {
       isReadByAdmin: false, // Telegram user send messages => conversation status is UNREAD
+      status: ConversationStatus.OPEN,
       lastMessageId: newMessage.id,
       lastMessageAt: new Date(),
     });
@@ -114,6 +116,7 @@ export class ChatService {
     // update conversation
     await this.conversationService.updateConversation(message.conversationId, {
       isReadByAdmin: true, // admin send message => conversation status is READ
+      status: ConversationStatus.OPEN,
       lastMessageId: message.id,
       lastMessageAt: new Date(),
     });
@@ -134,8 +137,6 @@ export class ChatService {
     });
 
     // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([
-      { ...message, createdAt: message.createdAt.toISOString() },
-    ]);
+    this.socketGateway.socketHandleUpdateChatHistory([{ ...message, createdAt: message.createdAt.toISOString() }]);
   }
 }
