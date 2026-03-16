@@ -1,14 +1,43 @@
-import { Conversation } from '@message-management/types';
+import { Conversation, UpdateConversationRequest } from '@message-management/types';
 import { CiRead, CiUnread } from 'react-icons/ci';
+import { BiArchiveOut } from 'react-icons/bi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateConversation } from '@message-management/client';
+import { toast } from 'react-toastify';
+import { MouseEvent } from 'react';
 
 interface ConversationItemProps extends React.HTMLAttributes<HTMLDivElement> {
   conversation: Conversation;
 }
 
-export default function ConversationItem({
-  conversation,
-  ...rest
-}: ConversationItemProps) {
+export default function ConversationItem({ conversation, ...rest }: ConversationItemProps) {
+  const queryClient = useQueryClient();
+
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
+      updateConversation(conversationId, body),
+    onSuccess: () => {
+      toast.success('Closed conversation successfully');
+      queryClient.invalidateQueries({
+        queryKey: ['conversation-list'],
+      });
+    },
+    onError: (err) => {
+      console.log('Error when closed conversation: ', err);
+      toast.error('Closed conversation failed');
+    },
+  });
+
+  const handleClickClosed = (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
+    e.stopPropagation();
+    updateConversationMutation.mutate({
+      conversationId: conversation.id,
+      body: {
+        status: 'CLOSED',
+      },
+    });
+  };
+
   return (
     <div
       {...rest}
@@ -17,16 +46,12 @@ export default function ConversationItem({
       <img
         className="object-cover w-12 h-12 rounded-full"
         src={conversation.telegramUser.avatarUrl}
-        alt={
-          conversation.telegramUser.username ||
-          conversation.telegramUser.telegramID
-        }
+        alt={conversation.telegramUser.username || conversation.telegramUser.telegramID}
       />
       <div className="card-info flex-1 flex flex-col">
         <div className="card-header flex justify-between items-center">
           <p className="text-sm font-semibold">
-            {conversation.telegramUser.username ||
-              conversation.telegramUser.telegramID}
+            {conversation.telegramUser.username || conversation.telegramUser.telegramID}
           </p>
           <p className="text-gray-500 text-sm">
             {new Date(conversation.lastMessageAt).toLocaleDateString('en-US', {
@@ -40,11 +65,23 @@ export default function ConversationItem({
             {conversation.lastMessage.senderType === 'INCOMING'
               ? `${conversation.telegramUser.username || conversation.telegramUser.telegramID}: `
               : 'System: '}
-            {conversation.lastMessage.type === 'FILE'
-              ? 'Sent a file'
-              : conversation.lastMessage.content}
+            {conversation.lastMessage.type === 'FILE' ? 'Sent a file' : conversation.lastMessage.content}
           </p>
-          {conversation.isReadByAdmin ? <CiRead className='text-xl' /> : <CiUnread className='text-blue-700 text-xl animate-bounce'/>}
+          <div className="flex gap-2 text-xl justify-center items-center group">
+            {conversation.status === 'OPEN' ? (
+              <BiArchiveOut
+                className="text-xl text-gray-400 hover:text-gray-700 transition duration-200 ease-linear"
+                onClick={handleClickClosed}
+              />
+            ) : (
+              ''
+            )}
+            {conversation.isReadByAdmin ? (
+              <CiRead className="text-xl" />
+            ) : (
+              <CiUnread className="text-blue-700 text-xl animate-bounce" />
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -3,14 +3,21 @@ import ConversationContent from '../../components/Conversation/ConversationConte
 import ConversationFilter from '../../components/Conversation/ConversationFilter';
 import ConversationList from '../../components/Conversation/ConversationList';
 import { ConversationIdContext } from '../../contexts/conversation.context';
+import { GetConversationRequest } from '@message-management/types';
+
+const initialFilter: GetConversationRequest = {
+  status: 'OPEN'
+}
 
 export default function Conversations() {
   const [conversationDetail, setConversationDetail] = useState<string | undefined>(undefined);
+  const [filter, setFilter] = useState<GetConversationRequest>(initialFilter)
+
   return (
     <div className="flex">
       <div className="bg-gray-50">
-        <ConversationFilter />
-        <ConversationList setConversation={setConversationDetail} />
+        <ConversationFilter onApplyFilter={setFilter} />
+        <ConversationList setConversation={setConversationDetail} filterCriteria={filter}/>
       </div>
       <ConversationIdContext value={conversationDetail}>
         <ConversationContent />

@@ -3,13 +3,19 @@ import ConversationItem from './ConversationItem';
 import { getConversationsList, updateConversation } from '@message-management/client';
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import { socket } from '../../socket';
-import { ApiDataForClient, Conversation, UpdateConversationRequest } from '@message-management/types';
+import {
+  ApiDataForClient,
+  Conversation,
+  GetConversationRequest,
+  UpdateConversationRequest,
+} from '@message-management/types';
 
 interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   setConversation: Dispatch<SetStateAction<string | undefined>>;
+  filterCriteria: GetConversationRequest;
 }
 
-export default function ConversationList({ setConversation, ...rest }: ConversationListProps) {
+export default function ConversationList({ setConversation, filterCriteria, ...rest }: ConversationListProps) {
   const queryClient = useQueryClient();
   const updateConversationMutation = useMutation({
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
@@ -21,18 +27,34 @@ export default function ConversationList({ setConversation, ...rest }: Conversat
       });
     },
     onError: (error) => {
-      console.log("Error when mutation conversation list", error);
-    }
+      console.log('Error when mutation conversation list', error);
+    },
   });
 
   useEffect(() => {
     const handlerConversationList = (payload: { conversation: Conversation }) => {
-      queryClient.setQueryData(['conversation-list'], (oldData: ApiDataForClient<Conversation[]>) => {
-        if (!oldData) return { result: [payload.conversation] };
-        return {
-          result: [payload.conversation, ...oldData.result.filter((c) => c.id !== payload.conversation.id)],
-        };
+      const queries = queryClient.getQueryCache().findAll({ queryKey: ['conversation-list'] });
+
+      queries.forEach((query) => {
+        const status = (query.queryKey[1] as GetConversationRequest).status;
+
+        queryClient.setQueryData(query.queryKey, (oldData: ApiDataForClient<Conversation[]>) => {
+          if (!oldData) return oldData;
+
+          const filteredList = oldData.result.filter((c) => c.id !== payload.conversation.id);
+
+          if (status === payload.conversation.status) {
+            return {
+              result: [payload.conversation, ...filteredList],
+            };
+          }
+
+          return {
+            result: filteredList,
+          };
+        });
       });
+
     };
     socket.on('conversation_updated', handlerConversationList);
     return () => {
@@ -41,8 +63,8 @@ export default function ConversationList({ setConversation, ...rest }: Conversat
   }, [queryClient]);
 
   const { isSuccess, data } = useQuery({
-    queryKey: ['conversation-list'],
-    queryFn: () => getConversationsList(),
+    queryKey: ['conversation-list', filterCriteria],
+    queryFn: () => getConversationsList(filterCriteria),
   });
 
   const handleOnClickConversationItem = (conversationId: string) => () => {
@@ -56,7 +78,7 @@ export default function ConversationList({ setConversation, ...rest }: Conversat
   };
 
   return (
-    <div {...rest} className="px-3 w-80 h-screen flex flex-col">
+    <div {...rest} className="px-3 w-96 h-screen flex flex-col">
       {isSuccess &&
         data.result.map((conversation) => (
           <ConversationItem

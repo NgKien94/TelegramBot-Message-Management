@@ -1,17 +1,25 @@
 import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
-import { UpdateConversationDto } from './conversation.dto';
+import { GetConversationDto, UpdateConversationDto } from './conversation.dto';
 
 @Injectable()
 export class ConversationService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getConversationsList() {
+  async getConversationsList(filter: GetConversationDto) {
     const conversations = await this.prismaService.conversation.findMany({
-      // where: {
-      //   status: 'OPEN'
-      // }
+      where: {
+        status: filter.status,
+        telegramUser: {
+          username: filter.search
+            ? {
+                contains: filter.search,
+                mode: 'insensitive',
+              }
+            : undefined,
+        },
+      },
       include: {
         telegramUser: true,
       },
