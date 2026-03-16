@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
-import { UpdateConversationDto } from './conversation.dto';
+import { GetConversationDto, UpdateConversationDto } from './conversation.dto';
 @Controller('conversations')
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
   @Get()
-  getConversationsList() {
-    return this.conversationService.getConversationsList();
+  getConversationsList(@Query() filter: GetConversationDto) {
+    return this.conversationService.getConversationsList(filter);
   }
 
   @Get(':id')

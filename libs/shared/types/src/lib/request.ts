@@ -22,6 +22,11 @@ export type RefreshTokenRequest = {
 }
 
 // ===============CONVERSATION============
+export type GetConversationRequest = {
+  search?: string
+  status?: string
+}
+
 export type UpdateConversationRequest = {
   isReadByAdmin?: boolean
   status?: string

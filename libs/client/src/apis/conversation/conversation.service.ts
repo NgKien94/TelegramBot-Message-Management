@@ -1,8 +1,13 @@
-import { ApiDataForClient, ChatHistoryOfConversation, Conversation, UpdateConversationRequest } from '@message-management/types';
+import { ApiDataForClient, ChatHistoryOfConversation, Conversation, GetConversationRequest, UpdateConversationRequest } from '@message-management/types';
 import { http } from '@message-management/utils';
 
-export const getConversationsList = () => {
-  return http.get<unknown, ApiDataForClient<Conversation[]>>('/conversations');
+export const getConversationsList = (filter: GetConversationRequest) => {
+  return http.get<unknown, ApiDataForClient<Conversation[]>>('/conversations', {
+    params: {
+      search: filter.search,
+      status: filter.status
+    }
+  });
 };
 
 export const getChatHistoryOfConversation = (conversationId: string) => {

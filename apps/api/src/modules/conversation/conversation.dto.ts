@@ -21,6 +21,18 @@ import {
 //   isReadByAdmin: boolean;
 // }
 
+export class GetConversationDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  search ?: string
+
+  @IsOptional()
+  @IsEnum(ConversationStatus)
+  @IsNotEmpty()
+  status ?: ConversationStatus
+}
+
 export class UpdateConversationDto {
   @IsOptional()
   @IsString()
