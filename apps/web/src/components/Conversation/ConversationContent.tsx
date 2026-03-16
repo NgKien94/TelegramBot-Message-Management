@@ -2,11 +2,16 @@ import { useContext, useEffect, useRef } from 'react';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getChatHistoryOfConversation } from '@message-management/client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getChatHistoryOfConversation, updateConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
 import { socket } from '../../socket';
-import { ApiDataForClient, ChatHistoryOfConversation, Messages } from '@message-management/types';
+import {
+  ApiDataForClient,
+  ChatHistoryOfConversation,
+  Messages,
+  UpdateConversationRequest,
+} from '@message-management/types';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 
 // interface ConversationContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -14,13 +19,23 @@ import { ConversationIdContext } from '../../contexts/conversation.context';
 // }
 
 export default function ConversationContent() {
-  const conversationId = useContext(ConversationIdContext)
+  const conversationId = useContext(ConversationIdContext);
 
   const queryClient = useQueryClient();
   const { isSuccess, isError, data } = useQuery({
     queryKey: ['chat-history', conversationId],
     queryFn: () => getChatHistoryOfConversation(conversationId || ''),
     enabled: !!conversationId,
+  });
+
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) => updateConversation(conversationId, body),
+    onSuccess: () => {
+      console.log("Update conversation successfully");
+      queryClient.invalidateQueries({
+        queryKey: ['conversation-list']
+      })
+    }
   });
 
   const historyRef = useRef<HTMLDivElement>(null);
@@ -39,14 +54,24 @@ export default function ConversationContent() {
           // in case of, websocket emit event while useQuery is fetching api
           if (!oldData) return oldData;
           // filter message for current conversation and replace messages array of this conversation
-          const newMessagesForCurrentConversation = payload.newMessages.filter((item) => item.conversationId === conversationId)
-          const replaceMessages = oldData.result.messages.push(...newMessagesForCurrentConversation)
+          const newMessagesForCurrentConversation = payload.newMessages.filter(
+            (item) => item.conversationId === conversationId,
+          );
+          const replaceMessages = oldData.result.messages.push(...newMessagesForCurrentConversation);
           return {
             ...oldData,
-            messages: replaceMessages
-          }
+            messages: replaceMessages,
+          };
         },
-      );
+      )
+      // mark current conversation is read
+      updateConversationMutation.mutate({
+        conversationId: conversationId as string,
+        body: {
+          isReadByAdmin: true,
+          status: 'OPEN',
+        },
+      });
     };
 
     socket.on('new_messages', conversationContentHandler);
@@ -54,7 +79,7 @@ export default function ConversationContent() {
     return () => {
       socket.off('new_messages', conversationContentHandler);
     };
-  }, [queryClient, conversationId]);
+  }, [queryClient, conversationId, updateConversationMutation]);
 
   return (
     <div className="w-full h-screen flex flex-col">

@@ -1,9 +1,9 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ConversationItem from './ConversationItem';
-import { getConversationsList } from '@message-management/client';
+import { getConversationsList, updateConversation } from '@message-management/client';
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import { socket } from '../../socket';
-import { ApiDataForClient, Conversation } from '@message-management/types';
+import { ApiDataForClient, Conversation, UpdateConversationRequest } from '@message-management/types';
 
 interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   setConversation: Dispatch<SetStateAction<string | undefined>>;
@@ -11,6 +11,19 @@ interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export default function ConversationList({ setConversation, ...rest }: ConversationListProps) {
   const queryClient = useQueryClient();
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
+      updateConversation(conversationId, body),
+    onSuccess: () => {
+      console.log('Update conversation successfully');
+      queryClient.invalidateQueries({
+        queryKey: ['conversation-list'],
+      });
+    },
+    onError: (error) => {
+      console.log("Error when mutation conversation list", error);
+    }
+  });
 
   useEffect(() => {
     const handlerConversationList = (payload: { conversation: Conversation }) => {
@@ -32,13 +45,23 @@ export default function ConversationList({ setConversation, ...rest }: Conversat
     queryFn: () => getConversationsList(),
   });
 
+  const handleOnClickConversationItem = (conversationId: string) => () => {
+    setConversation(conversationId);
+    updateConversationMutation.mutate({
+      conversationId: conversationId as string,
+      body: {
+        isReadByAdmin: true,
+      },
+    });
+  };
+
   return (
     <div {...rest} className="px-3 w-80 h-screen flex flex-col">
       {isSuccess &&
         data.result.map((conversation) => (
           <ConversationItem
             conversation={conversation}
-            onClick={() => setConversation(conversation.id)}
+            onClick={handleOnClickConversationItem(conversation.id)}
             key={conversation.id}
           />
         ))}
