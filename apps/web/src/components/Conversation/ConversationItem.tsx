@@ -44,7 +44,7 @@ export default function ConversationItem({
               ? 'Sent a file'
               : conversation.lastMessage.content}
           </p>
-          {conversation.isReadByAdmin ? <CiRead /> : <CiUnread />}
+          {conversation.isReadByAdmin ? <CiRead className='text-xl' /> : <CiUnread className='text-blue-700 text-xl animate-bounce'/>}
         </div>
       </div>
     </div>
