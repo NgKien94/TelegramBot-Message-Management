@@ -29,13 +29,14 @@ export default function ConversationContent() {
   });
 
   const updateConversationMutation = useMutation({
-    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) => updateConversation(conversationId, body),
+    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
+      updateConversation(conversationId, body),
     onSuccess: () => {
-      console.log("Update conversation successfully");
+      console.log('Update conversation successfully');
       queryClient.invalidateQueries({
-        queryKey: ['conversation-list']
-      })
-    }
+        queryKey: ['conversation-list'],
+      });
+    },
   });
 
   const historyRef = useRef<HTMLDivElement>(null);
@@ -63,15 +64,16 @@ export default function ConversationContent() {
             messages: replaceMessages,
           };
         },
-      )
+      );
       // mark current conversation is read
-      updateConversationMutation.mutate({
-        conversationId: conversationId as string,
-        body: {
-          isReadByAdmin: true,
-          status: 'OPEN',
-        },
-      });
+      if (conversationId) {
+        updateConversationMutation.mutate({
+          conversationId: conversationId as string,
+          body: {
+            isReadByAdmin: true,
+          },
+        });
+      }
     };
 
     socket.on('new_messages', conversationContentHandler);
