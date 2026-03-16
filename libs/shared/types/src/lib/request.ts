@@ -21,6 +21,12 @@ export type RefreshTokenRequest = {
   token: string // refresh_token
 }
 
+// ===============CONVERSATION============
+export type UpdateConversationRequest = {
+  isReadByAdmin?: boolean
+  status?: string
+}
+
 // =================MESSAGE================
 export type CreateMessageRequest = {
   fileUrl ?: string

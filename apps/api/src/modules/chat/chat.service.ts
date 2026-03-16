@@ -39,6 +39,7 @@ export class ChatService {
 
     // update conversation (lastMessage)
     await this.conversationService.updateConversation(conversation.id, {
+      isReadByAdmin: false, // Admin don't send message => conversation status is UNREAD
       lastMessageId: botMessage.id,
       lastMessageAt: new Date(),
     });
@@ -80,6 +81,7 @@ export class ChatService {
 
     // update conversation
     await this.conversationService.updateConversation(conversation.id, {
+      isReadByAdmin: false, // Telegram user send messages => conversation status is UNREAD
       lastMessageId: newMessage.id,
       lastMessageAt: new Date(),
     });
@@ -111,6 +113,7 @@ export class ChatService {
 
     // update conversation
     await this.conversationService.updateConversation(message.conversationId, {
+      isReadByAdmin: true, // admin send message => conversation status is READ
       lastMessageId: message.id,
       lastMessageAt: new Date(),
     });
