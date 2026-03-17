@@ -1,13 +1,17 @@
 import { GetConversationRequest } from '@message-management/types';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { TextField } from '@radix-ui/themes';
 import clsx from 'clsx';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface ConversationFilterProps extends React.HTMLAttributes<HTMLDivElement> {
+  filter: GetConversationRequest;
   onApplyFilter: Dispatch<SetStateAction<GetConversationRequest>>;
 }
 
-export default function ConversationFilter({ onApplyFilter }: ConversationFilterProps) {
-  const [isActive, setIsActive] = useState<string>('OPEN');
+export default function ConversationFilter({ onApplyFilter, filter }: ConversationFilterProps) {
+  const [searchValue, setSearchValue] = useState<string>('');
+  const isActive = filter.status;
 
   const tabClasses = (type: string) => {
     return isActive === type
@@ -15,29 +19,61 @@ export default function ConversationFilter({ onApplyFilter }: ConversationFilter
       : '';
   };
 
-  const handleOnClickOpen = () => {
-    setIsActive('OPEN');
-    onApplyFilter({ status: 'OPEN' });
+  const handleChangeStatus = (status: 'OPEN' | 'CLOSED') => () => {
+    onApplyFilter((prev) => {
+      return {
+        ...prev,
+        status,
+      };
+    });
   };
 
-  const handleOnClickClosed = () => {
-    setIsActive('CLOSED');
-    onApplyFilter({ status: 'CLOSED' });
-  };
+  useEffect(() => {
+    const debounceChangeSearchValue = setTimeout(() => {
+      onApplyFilter((prev) => {
+        if (searchValue) {
+          return {
+            ...prev,
+            search: searchValue,
+          };
+        }
+
+        delete prev.search
+
+        return {
+          ...prev,
+        };
+      });
+    }, 1000);
+
+    return () => clearTimeout(debounceChangeSearchValue);
+  }, [searchValue, onApplyFilter]);
 
   return (
-    <div className="flex text-center text-sm h-12 justify-between items-center">
-      <div
-        className={clsx('flex-1 hover:cursor-pointer font-semibold ', tabClasses('OPEN'))}
-        onClick={handleOnClickOpen}
+    <div className="filter-container p-3">
+      <TextField.Root
+        placeholder="Search a conversation ..."
+        radius="full"
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
       >
-        Open
-      </div>
-      <div
-        className={clsx('flex-1 hover:cursor-pointer font-semibold', tabClasses('CLOSED'))}
-        onClick={handleOnClickClosed}
-      >
-        Closed
+        <TextField.Slot>
+          <MagnifyingGlassIcon height="16" width="16" />
+        </TextField.Slot>
+      </TextField.Root>
+      <div className="flex text-center text-sm h-12 justify-between items-center">
+        <div
+          className={clsx('flex-1 hover:cursor-pointer font-semibold ', tabClasses('OPEN'))}
+          onClick={handleChangeStatus('OPEN')}
+        >
+          Open
+        </div>
+        <div
+          className={clsx('flex-1 hover:cursor-pointer font-semibold', tabClasses('CLOSED'))}
+          onClick={handleChangeStatus('CLOSED')}
+        >
+          Closed
+        </div>
       </div>
     </div>
   );

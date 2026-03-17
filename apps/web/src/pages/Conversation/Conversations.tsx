@@ -16,7 +16,7 @@ export default function Conversations() {
   return (
     <div className="flex">
       <div className="bg-gray-50">
-        <ConversationFilter onApplyFilter={setFilter} />
+        <ConversationFilter onApplyFilter={setFilter} filter={filter} />
         <ConversationList setConversation={setConversationDetail} filterCriteria={filter}/>
       </div>
       <ConversationIdContext value={conversationDetail}>
