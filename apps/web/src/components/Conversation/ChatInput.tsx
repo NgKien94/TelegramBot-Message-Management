@@ -37,7 +37,7 @@ export default function ChatInput() {
       <TextArea
         size="1"
         placeholder="Message..."
-        className="w-2/4"
+        className="w-2/4 min-h-11"
         value={message}
         onChange={(e) => {
           setMessage(e.target.value);

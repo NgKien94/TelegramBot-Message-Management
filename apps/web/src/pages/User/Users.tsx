@@ -28,9 +28,9 @@ export default function Users() {
               data.result.map((item) => (
                 <tr className="text-center" key={item.telegramID}>
                   <td className="border border-gray-400 px-4 py-2">{item.telegramID}</td>
-                  <td className="border border-gray-400 px-4 py-2">{item.username}</td>
-                  <td className="border border-gray-400 px-4 py-2">{item.firstName}</td>
-                  <td className="border border-gray-400 px-4 py-2">{item.lastName}</td>
+                  <td className="border border-gray-400 px-4 py-2">{item.username ? item.username: <span className='text-red-500'>Not register</span>}</td>
+                  <td className="border border-gray-400 px-4 py-2">{item.firstName ? item.firstName: <span className='text-red-500'>Not register</span>}</td>
+                  <td className="border border-gray-400 px-4 py-2">{item.lastName ? item.lastName: <span className='text-red-500'>Not register</span>}</td>
                   <td className="border border-gray-400 px-4 py-2 cursor-pointer">
                     <Badge color="green" size="2">
                       <EyeOpenIcon />
