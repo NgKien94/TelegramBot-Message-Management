@@ -78,7 +78,7 @@ export default function ConversationList({ setConversation, filterCriteria, ...r
   };
 
   return (
-    <div {...rest} className="px-3 w-96 h-screen flex flex-col">
+    <div {...rest} className="px-3 w-96 h-screen flex flex-col space-y-2">
       {isSuccess &&
         data.result.map((conversation) => (
           <ConversationItem
