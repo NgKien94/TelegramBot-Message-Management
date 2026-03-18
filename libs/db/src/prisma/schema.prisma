@@ -6,7 +6,7 @@
 
 // npx prisma generate --schema=libs/db/src/prisma/schema.prisma
 // npx prisma db push --schema=libs/db/src/prisma/schema.prisma
-
+// $env:DATABASE_URL="mongodb://localhost:27018/db_project?replicaSet=rs0&directConnection=true"; npx prisma db push --schema=libs/db/src/prisma/schema.prisma (run with power shell)
 generator client {
   provider = "prisma-client-js"
 }

@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: api
+    env_file: .env.docker
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+    networks:
+      - big_project_network
+  database:
+    image: mongo:8
+    ports:
+      - "27018:27017"
+    volumes:
+      - "mongodb_data:/data/db"
+    command: ["--replSet", "rs0", "--bind_ip_all"] # add replicaset
+    container_name: database
+    networks:
+      - big_project_network
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    container_name: web
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    env_file:
+      - .env.docker
+    networks:
+      - big_project_network
+
+networks:
+  big_project_network: {}
+volumes:
+  mongodb_data: {}
