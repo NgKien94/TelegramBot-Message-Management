@@ -19,6 +19,8 @@ import { TelegramModule } from '../modules/telegram-bot/telegram.module';
 import { ConversationModule } from '../modules/conversation/conversation.module';
 import { SocketModule } from '../modules/socket/socket.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bullmq';
+import { QueueModule } from '../modules/queue/queue.module';
 
 @Module({
   imports: [
@@ -26,6 +28,13 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379
+      }
+    }),
+    QueueModule,
     EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
