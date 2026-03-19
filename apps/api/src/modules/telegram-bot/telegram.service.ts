@@ -5,6 +5,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
+import { toHTML, toMarkdownV2 } from '@telegraf/entity';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -62,10 +63,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private async botListenMessage() {
     this.bot.on(message('text'), async (ctx) => {
-      console.log('Text ');
+      // console.log('Text ');
       const { id, username, first_name, last_name } = ctx.from;
-      // get message (ctx.message.text)
-      const content = ctx.message.text;
+      // const html = toHTML(ctx.message);
+      // const contentWithCommonMark = this.turndownService.turndown(html);
+      const content = toMarkdownV2(ctx.message);
 
       // update user (username, first_name, last_name)
       const updatedUser = await this.userService.updateUserByTelegramId(String(id), {
@@ -100,7 +102,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   @OnEvent('message.outgoing.created')
   async sendMessageToTelegramUser(payload: { messageId: string; content: string; telegramId: string }) {
-    await this.bot.telegram.sendMessage(payload.telegramId, payload.content);
+    // const convertContentToMarkdownV2 = convert(payload.content);
+    try {
+      await this.bot.telegram.sendMessage(payload.telegramId, payload.content, {
+        parse_mode: 'MarkdownV2',
+      });
+    } catch (error) {
+      console.log("Error: ",error);
+      //fallback plain Text if send markdown message failed
+      await this.bot.telegram.sendMessage(payload.telegramId, payload.content);
+    }
 
     await this.chatService.handleSendMessageToTelegramUser(payload.messageId);
   }
