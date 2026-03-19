@@ -1,11 +1,11 @@
 // =================AUTH================
 
-import { MessageType, SenderType } from "./enum"
+import { MessageType, SenderType } from './enum';
 
 export type LoginRequest = {
-  email: string
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 // export type RegisterRequest = {
 //   email: string
@@ -14,31 +14,38 @@ export type LoginRequest = {
 // }
 
 export type LogoutRequest = {
-  token: string // refresh_token
-}
+  token: string; // refresh_token
+};
 
 export type RefreshTokenRequest = {
-  token: string // refresh_token
-}
+  token: string; // refresh_token
+};
 
 // ===============CONVERSATION============
 export type GetConversationRequest = {
-  search?: string
-  status?: string
-}
+  search?: string;
+  status?: string;
+};
 
 export type UpdateConversationRequest = {
-  isReadByAdmin?: boolean
-  status?: string
-}
+  isReadByAdmin?: boolean;
+  status?: string;
+};
 
 // =================MESSAGE================
 export type CreateMessageRequest = {
-  fileUrl ?: string
-  fileName ?: string
-  content ?: string
-  type ?: MessageType
-  senderType : SenderType
-  sentByAdmin : boolean
-  conversationId : string
-}
+  fileUrl?: string;
+  fileName?: string;
+  content?: string;
+  type?: MessageType;
+  senderType: SenderType;
+  sentByAdmin: boolean;
+  conversationId: string;
+};
+
+export type SendMessageBroadcastRequest = {
+  fileUrl?: string;
+  fileName?: string;
+  content?: string;
+  type?: MessageType;
+};
