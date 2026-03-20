@@ -47,7 +47,7 @@ import { QueueModule } from '../modules/queue/queue.module';
   providers: [
     AppService,
     {
-      provide: APP_PIPE,
+      provide: APP_PIPE, // only for HTTP context
       useFactory: () =>
         new ValidationPipe({
           whitelist: true, // remove fields not in dto
