@@ -11,7 +11,7 @@ import { RegisterDto } from './auth.dto';
 export class AuthService {
   private access_token_secret: string;
   private access_token_expires_in: string;
-  private refresh_token_token_secret: string;
+  private refresh_token_secret: string;
   private refresh_token_expires_in: string;
 
   constructor(
@@ -21,10 +21,22 @@ export class AuthService {
   ) {
     this.access_token_secret = this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET');
     this.access_token_expires_in = this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRES_IN');
-    this.refresh_token_token_secret = this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET');
+    this.refresh_token_secret = this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET');
     this.refresh_token_expires_in = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN');
   }
 
+  async getMe(accountId: string) {
+    const user = await this.prismaService.account.findUnique({
+      where: {
+        id: accountId
+      }
+    })
+
+    if(!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user
+  }
 
   async login(email: string, password: string) {
     const account = await this.prismaService.account.findUnique({
@@ -52,7 +64,7 @@ export class AuthService {
     });
 
     const refresh_token = this.jwtService.sign(tokenPayload, {
-      secret: this.refresh_token_token_secret,
+      secret: this.refresh_token_secret,
       expiresIn: this.refresh_token_expires_in as StringValue,
     });
     // save refresh_token into Database
@@ -99,7 +111,7 @@ export class AuthService {
     });
 
     const refresh_token = this.jwtService.sign(tokenPayload, {
-      secret: this.refresh_token_token_secret,
+      secret: this.refresh_token_secret,
       expiresIn: this.refresh_token_expires_in as StringValue,
     });
 
@@ -132,7 +144,7 @@ export class AuthService {
 
     try {
       const payload = this.jwtService.verify<TokenPayload>(refresh_token, {
-        secret: this.refresh_token_token_secret,
+        secret: this.refresh_token_secret,
       });
 
       const { accountId } = payload;

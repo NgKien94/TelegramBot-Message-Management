@@ -9,9 +9,9 @@ export class AuthController {
 
   @Get('me')
   getMeController(
-    @Req() req: Request & { user: { id: string; email: string } },
+    @Req() req: Request & { user: { id: string } },
   ) {
-    return req.user;
+    return this.authService.getMe(req.user.id)
   }
 
   @PUBLIC()
