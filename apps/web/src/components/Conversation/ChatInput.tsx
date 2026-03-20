@@ -3,31 +3,44 @@ import { useContext, useState } from 'react';
 import { VscSend } from 'react-icons/vsc';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import { useMutation } from '@tanstack/react-query';
-import { createMessage } from '@message-management/client';
+import { createMessage, socket } from '@message-management/client';
 import { SenderType } from '@message-management/types';
 
 export default function ChatInput() {
   const conversationId = useContext(ConversationIdContext);
   const [message, setMessage] = useState<string>('');
-  const createMessageMutation = useMutation({
-    mutationFn: createMessage,
-    onSuccess: () => {
-      console.log('Create message successfully');
-    },
-    onError: (error) => {
-      console.log('Create message failed: ', error);
-    },
-  });
+  // const createMessageMutation = useMutation({
+  //   mutationFn: createMessage,
+  //   onSuccess: () => {
+  //     console.log('Create message successfully');
+  //   },
+  //   onError: (error) => {
+  //     console.log('Create message failed: ', error);
+  //   },
+  // });
+
+  // const handleOnClickSend = () => {
+  //   if (message) {
+  //     console.log('Value: ', message);
+  //     createMessageMutation.mutate({
+  //       conversationId: conversationId || '',
+  //       senderType: SenderType.OUTGOING,
+  //       content: message,
+  //       sentByAdmin: true
+  //     })
+  //   }
+  //   setMessage('');
+  // };
 
   const handleOnClickSend = () => {
     if (message) {
-      console.log('Value: ', message);
-      createMessageMutation.mutate({
+      console.log('Client emit create message event: ', message);
+      socket.emit('create_message', {
         conversationId: conversationId || '',
         senderType: SenderType.OUTGOING,
         content: message,
-        sentByAdmin: true
-      })
+        sentByAdmin: true,
+      });
     }
     setMessage('');
   };
