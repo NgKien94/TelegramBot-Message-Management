@@ -1,12 +1,12 @@
 import { Conversation, Messages } from '@message-management/types';
-import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { UseGuards } from '@nestjs/common';
+import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { WsJwtGuard } from '../../core/auth/socket.guard';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
+@UseGuards(WsJwtGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -16,10 +16,31 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
+  constructor(private readonly jwtService: JwtService, private readonly configService: ConfigService){}
+
   handleDisconnect(client: Socket) {
     console.log('Client disconnected: ', client.id);
   }
   handleConnection(client: Socket) {
+    const token = client.handshake.auth?.token;
+
+    if (!token) {
+      console.log('No token, disconnecting:', client.id);
+      client.disconnect();
+      return;
+    }
+
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET')
+      });
+      // client.data.user = payload; // { userId, email, ... }
+      // console.log('Client connected:', client.id, '| User:', payload.email);
+      console.log("Payload - client connected: ",payload);
+    } catch {
+      console.log('Invalid token, disconnecting:', client.id);
+      client.disconnect();
+    }
     console.log('Client connected: ', client.id);
   }
 
@@ -30,8 +51,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   socketHandleUpdateChatHistory(messages: Messages[]) {
-    this.server.emit('new_messages',{
-      newMessages: messages
-    })
+    this.server.emit('new_messages', {
+      newMessages: messages,
+    });
   }
 }

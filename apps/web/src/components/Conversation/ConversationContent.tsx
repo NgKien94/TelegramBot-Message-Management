@@ -3,9 +3,10 @@ import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getChatHistoryOfConversation, updateConversation } from '@message-management/client';
+import { getChatHistoryOfConversation, socket, updateConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
-import { socket } from '../../socket';
+// import { socket } from '../../socket';
+
 import {
   ApiDataForClient,
   ChatHistoryOfConversation,

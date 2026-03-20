@@ -3,7 +3,6 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PUBLIC_KEY } from '../decorator/custom.decorator';
@@ -39,29 +38,31 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<TokenPayload>(
+      const payload = this.jwtService.verify<TokenPayload>(
         tokenRequest,
         {
           secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         },
       );
 
-      const user = await this.prismaService.account.findUnique({
-        where: {
-          id: payload.accountId,
-        },
-        select: {
-          id: true,
-          email: true,
-        },
-      });
-
-      if (!user) {
-        throw new NotFoundException('Account not found');
+      request['user'] = {
+        id: payload.accountId
       }
 
-      request['user'] = user;
-      console.log(request['user']);
+      // const user = await this.prismaService.account.findUnique({
+      //   where: {
+      //     id: payload.accountId,
+      //   },
+      //   select: {
+      //     id: true,
+      //     email: true,
+      //   },
+      // });
+
+      // if (!user) {
+      //   throw new NotFoundException('Account not found');
+      // }
+
       return true;
     } catch (error) {
       if (error instanceof TokenExpiredError) {

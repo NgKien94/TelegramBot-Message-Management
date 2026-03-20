@@ -65,7 +65,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.bot.on(message('text'), async (ctx) => {
       // console.log('Text ');
       const { id, username, first_name, last_name } = ctx.from;
+      // console.log("Raw: ",ctx.message);
       // const html = toHTML(ctx.message);
+      // console.log("");
       // const contentWithCommonMark = this.turndownService.turndown(html);
       const content = toMarkdownV2(ctx.message);
 
