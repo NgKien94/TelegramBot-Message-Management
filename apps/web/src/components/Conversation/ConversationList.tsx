@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ConversationItem from './ConversationItem';
-import { getConversationsList, updateConversation } from '@message-management/client';
+import { getConversationsList, socket, updateConversation } from '@message-management/client';
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { socket } from '../../socket';
+// import { socket } from '../../socket';
+
 import {
   ApiDataForClient,
   Conversation,
