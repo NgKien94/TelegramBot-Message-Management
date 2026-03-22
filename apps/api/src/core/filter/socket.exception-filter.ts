@@ -12,7 +12,7 @@ export class WebSocketExceptionFilter extends BaseWsExceptionFilter {
     if (exception instanceof WsException) {
       error = exception.getError() as any;
     }
-    console.log("Websocket exception filter log : ",error);
+
     client.emit('error', error);
   }
 }

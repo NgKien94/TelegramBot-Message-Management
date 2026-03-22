@@ -9,7 +9,6 @@ interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Modal({ onClose, isOpen, children, className, header }: ModalProps) {
   useEffect(() => {
-    console.log('Use effect execute');
 
     if (!isOpen) {
       return;

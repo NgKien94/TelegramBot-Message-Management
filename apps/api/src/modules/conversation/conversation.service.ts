@@ -74,8 +74,7 @@ export class ConversationService {
     });
 
     if (isExistConversationWithUser) {
-      // // User has had a conversation
-      // console.log("Exit conversation: ",isExistConversationWithUser)
+      // User has had a conversation
       return isExistConversationWithUser;
     }
 
@@ -86,8 +85,6 @@ export class ConversationService {
         isReadByAdmin: false,
       },
     });
-
-    // console.log("New conversation: ", newConversation);
 
     return newConversation;
   }

@@ -18,7 +18,6 @@ export class ChatService {
   async handleStartConversation(userId: string, welcomeMessageFromBot: string) {
     // get existing conversation or create it
     const conversation = await this.conversationService.getOrCreateConversation(userId);
-    // console.log('Handle start conversation: ', newConversation);
     // add message from Telegram user into conversation
     const userMessage = await this.messageService.addMessageIntoConversation(conversation.id, {
       content: '/start',
