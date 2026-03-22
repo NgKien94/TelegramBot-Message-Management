@@ -1,10 +1,8 @@
 import { Conversation, Messages } from '@message-management/types';
 import { UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -13,8 +11,6 @@ import { WsJwtGuard } from '../../core/auth/socket.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { WebSocketExceptionFilter } from '../../core/filter/socket.exception-filter';
-import { CreateMessageInGatewayDto } from './socket.dto';
-import { MessageService } from '../message/message.service';
 
 @UsePipes(
   new ValidationPipe({
@@ -39,7 +35,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly messageService: MessageService
   ) {}
 
   handleDisconnect(client: Socket) {
@@ -58,8 +53,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = this.jwtService.verify(token, {
         secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
       });
-      // client.data.user = payload; // { userId, email, ... }
-      // console.log('Client connected:', client.id, '| User:', payload.email);
+
       console.log('Payload - client connected: ', payload);
     } catch {
       console.log('Invalid token, disconnecting:', client.id);
@@ -80,11 +74,11 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @SubscribeMessage('create_message')
-  socketHandleReceiveMessage(@MessageBody() data: CreateMessageInGatewayDto) {
-    console.log("==============================");
-    console.log("Run here");
-    console.log("==============================");
-    this.messageService.addMessageIntoConversation(data.conversationId,data)
-  }
+  // @SubscribeMessage('create_message')
+  // socketHandleReceiveMessage(@MessageBody() data: CreateMessageInGatewayDto) {
+  //   console.log("==============================");
+  //   console.log("Run here");
+  //   console.log("==============================");
+  //   this.messageService.addMessageIntoConversation(data.conversationId,data)
+  // }
 }

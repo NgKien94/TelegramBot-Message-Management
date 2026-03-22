@@ -9,41 +9,41 @@ import { SenderType } from '@message-management/types';
 export default function ChatInput() {
   const conversationId = useContext(ConversationIdContext);
   const [message, setMessage] = useState<string>('');
-  // const createMessageMutation = useMutation({
-  //   mutationFn: createMessage,
-  //   onSuccess: () => {
-  //     console.log('Create message successfully');
-  //   },
-  //   onError: (error) => {
-  //     console.log('Create message failed: ', error);
-  //   },
-  // });
-
-  // const handleOnClickSend = () => {
-  //   if (message) {
-  //     console.log('Value: ', message);
-  //     createMessageMutation.mutate({
-  //       conversationId: conversationId || '',
-  //       senderType: SenderType.OUTGOING,
-  //       content: message,
-  //       sentByAdmin: true
-  //     })
-  //   }
-  //   setMessage('');
-  // };
+  const createMessageMutation = useMutation({
+    mutationFn: createMessage,
+    onSuccess: () => {
+      console.log('Create message successfully');
+    },
+    onError: (error) => {
+      console.log('Create message failed: ', error);
+    },
+  });
 
   const handleOnClickSend = () => {
     if (message) {
-      console.log('Client emit create message event: ', message);
-      socket.emit('create_message', {
+      console.log('Value: ', message);
+      createMessageMutation.mutate({
         conversationId: conversationId || '',
         senderType: SenderType.OUTGOING,
         content: message,
-        sentByAdmin: true,
-      });
+        sentByAdmin: true
+      })
     }
     setMessage('');
   };
+
+  // const handleOnClickSend = () => {
+  //   if (message) {
+  //     console.log('Client emit create message event: ', message);
+  //     socket.emit('create_message', {
+  //       conversationId: conversationId || '',
+  //       senderType: SenderType.OUTGOING,
+  //       content: message,
+  //       sentByAdmin: true,
+  //     });
+  //   }
+  //   setMessage('');
+  // };
 
   return (
     <div className="flex justify-center items-center gap-5 h-full">
