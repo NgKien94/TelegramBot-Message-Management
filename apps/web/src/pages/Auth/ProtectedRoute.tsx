@@ -8,12 +8,6 @@ export default function ProtectedRoute() {
   const token = localStorage.getItem('access_token')
   useLocation() // rerender this component whenever change location
 
-  console.log("Rerender Protected route");
-  // const { isSuccess } = useQuery({
-  //     queryKey: ['profile'],
-  //     queryFn: () => getMe(),
-  //     enabled: Boolean(token),
-  //   });
   useEffect(()=> {
     socket.connect()
 

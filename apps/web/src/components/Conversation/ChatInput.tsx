@@ -21,7 +21,6 @@ export default function ChatInput() {
 
   const handleOnClickSend = () => {
     if (message) {
-      console.log('Value: ', message);
       createMessageMutation.mutate({
         conversationId: conversationId || '',
         senderType: SenderType.OUTGOING,

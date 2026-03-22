@@ -20,7 +20,7 @@ export class QueueProcessor extends WorkerHost {
         return {};
       }
       default: {
-        console.log('Nothing');
+        console.log('Default handler in processor');
         return {};
       }
     }

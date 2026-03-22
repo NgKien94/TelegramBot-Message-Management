@@ -66,6 +66,7 @@ export default function ConversationContent() {
           };
         },
       );
+
       // mark current conversation is read
       if (conversationId) {
         updateConversationMutation.mutate({
