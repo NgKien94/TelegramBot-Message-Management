@@ -25,7 +25,7 @@ import { WebSocketExceptionFilter } from '../../core/filter/socket.exception-fil
 @UseGuards(WsJwtGuard)
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'http://localhost:4200',
   },
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
