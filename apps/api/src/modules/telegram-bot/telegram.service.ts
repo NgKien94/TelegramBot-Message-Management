@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
-import { toHTML, toMarkdownV2 } from '@telegraf/entity';
+import { toMarkdownV2 } from '@telegraf/entity';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -37,7 +37,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.botListenMessage();
   }
 
-  private async botOnStart() {
+  private botOnStart() {
     // replace later
     const WELCOME_MESSAGE = 'Welcome';
 
@@ -47,7 +47,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const { id, username, first_name, last_name } = ctx.from;
 
       const telegramUserAvatar = await this.getAvatarTelegramUser(ctx.from.id);
-      // // console.log(telegramUserAvatar);
 
       const telegramUser = await this.userService.createUser({
         username,
@@ -61,14 +60,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private async botListenMessage() {
+  private botListenMessage() {
     this.bot.on(message('text'), async (ctx) => {
-      // console.log('Text ');
       const { id, username, first_name, last_name } = ctx.from;
-      // console.log("Raw: ",ctx.message);
-      // const html = toHTML(ctx.message);
-      // console.log("");
-      // const contentWithCommonMark = this.turndownService.turndown(html);
       const content = toMarkdownV2(ctx.message);
 
       // update user (username, first_name, last_name)
@@ -104,7 +98,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   @OnEvent('message.outgoing.created')
   async sendMessageToTelegramUser(payload: { messageId: string; content: string; telegramId: string }) {
-    // const convertContentToMarkdownV2 = convert(payload.content);
     try {
       await this.bot.telegram.sendMessage(payload.telegramId, payload.content, {
         parse_mode: 'MarkdownV2',

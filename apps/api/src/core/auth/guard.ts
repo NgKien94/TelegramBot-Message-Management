@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
         context.getClass(),
       ]) ?? false;
     if (isPublic) return true;
-    // console.log('PUBLIC: ', isPublic);
+
     const request = context
       .switchToHttp()
       .getRequest<{ token_secret?: string }>();
@@ -48,20 +48,6 @@ export class AuthGuard implements CanActivate {
       request['user'] = {
         id: payload.accountId
       }
-
-      // const user = await this.prismaService.account.findUnique({
-      //   where: {
-      //     id: payload.accountId,
-      //   },
-      //   select: {
-      //     id: true,
-      //     email: true,
-      //   },
-      // });
-
-      // if (!user) {
-      //   throw new NotFoundException('Account not found');
-      // }
 
       return true;
     } catch (error) {

@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { VscSend } from 'react-icons/vsc';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import { useMutation } from '@tanstack/react-query';
-import { createMessage, socket } from '@message-management/client';
+import { createMessage } from '@message-management/client';
 import { SenderType } from '@message-management/types';
 
 export default function ChatInput() {
