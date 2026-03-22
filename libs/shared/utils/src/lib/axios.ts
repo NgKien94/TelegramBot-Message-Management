@@ -11,6 +11,7 @@ class Http {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true
     });
 
     // execute before request is sent
