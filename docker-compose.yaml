@@ -21,6 +21,15 @@ services:
     container_name: database
     networks:
       - big_project_network
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis_data:/data"
+    container_name: redis
+    networks:
+      - big_project_network
 
   web:
     build:
@@ -40,3 +49,4 @@ networks:
   big_project_network: {}
 volumes:
   mongodb_data: {}
+  redis_data: {}
