@@ -48,4 +48,5 @@ export type SendMessageBroadcastRequest = {
   fileName?: string;
   content?: string;
   type?: MessageType;
+  conversationIds: string[]
 };
