@@ -32,7 +32,6 @@ export class AuthController {
     return this.authService.refreshToken(payload.token);
   }
 
-  @PUBLIC()
   @Post('logout')
   logoutController(@Body() payload: LogoutDto) {
     return this.authService.logout(payload.token);
