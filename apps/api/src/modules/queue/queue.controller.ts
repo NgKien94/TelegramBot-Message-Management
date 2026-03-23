@@ -3,7 +3,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { UserService } from '../user/user.service';
 import { CreateMessageOfQueueDto } from './queue.dto';
-import { MessageType, SenderType } from '@message-management/types';
+import {  SenderType } from '@message-management/types';
 import { SendMessageJobType } from './queue.type';
 
 @Controller('broadcast')
@@ -15,22 +15,22 @@ export class QueueController {
 
   @Post('messages')
   async sendMessagesJob(@Body() body: CreateMessageOfQueueDto) {
-    const users = await this.usersService.getUsers();
+    const {conversationIds, ...rest} = body
+
     await this.queue.addBulk(
-      users.map((user) => {
+      conversationIds.map( conversationId => {
         return {
           name: 'send-messages-job',
           data: {
-            conversationId: user.conversation.id,
+            conversationId,
             payload: {
-              ...body,
-              type: MessageType.TEXT,
+              ...rest,
               senderType: SenderType.OUTGOING,
-              sentByAdmin: true,
-            },
-          },
-        };
-      }),
-    );
+              sentByAdmin: true
+            }
+          }
+        }
+      })
+    )
   }
 }

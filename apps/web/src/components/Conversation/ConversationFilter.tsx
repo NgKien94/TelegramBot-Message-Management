@@ -2,7 +2,7 @@ import { GetConversationRequest } from '@message-management/types';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { TextField } from '@radix-ui/themes';
 import clsx from 'clsx';
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {  Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface ConversationFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   filter: GetConversationRequest;

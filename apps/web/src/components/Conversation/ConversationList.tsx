@@ -55,9 +55,9 @@ export default function ConversationList({ setConversation, filterCriteria, ...r
           };
         });
       });
-
     };
     socket.on('conversation_updated', handlerConversationList);
+
     return () => {
       socket.off('conversation_updated', handlerConversationList);
     };

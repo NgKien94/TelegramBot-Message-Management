@@ -58,6 +58,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch {
       console.log('Invalid token, disconnecting:', client.id);
       client.disconnect();
+      return;
     }
     console.log('Client connected: ', client.id);
   }

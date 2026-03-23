@@ -93,6 +93,9 @@ class Http {
             localStorage.setItem('access_token', newAccessToken);
             originalConfig.headers.Authorization = `Bearer ${newAccessToken}`;
 
+            // dispatch event change access_token => protected route rerender with new token
+            window.dispatchEvent(new CustomEvent('token_refreshed', { detail: newAccessToken }));
+
             return this.axiosIntance(originalConfig);
           } catch (errorFromRetry) {
             localStorage.removeItem('access_token');

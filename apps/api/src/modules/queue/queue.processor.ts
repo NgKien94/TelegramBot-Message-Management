@@ -13,10 +13,12 @@ export class QueueProcessor extends WorkerHost {
     switch (job.name) {
       case 'send-messages-job': {
         const { conversationId, payload } = job.data;
+
         await this.messageService.addMessageIntoConversation(conversationId, {
           conversationId,
           ...payload,
         });
+
         return {};
       }
       default: {
