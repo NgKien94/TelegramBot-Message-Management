@@ -1,11 +1,9 @@
 import { useContext, useEffect, useRef } from 'react';
-import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getChatHistoryOfConversation, socket, updateConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
-// import { socket } from '../../socket';
 
 import {
   ApiDataForClient,
@@ -16,9 +14,6 @@ import {
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import Editor from '../Editor/Editor';
 
-// interface ConversationContentProps extends React.HTMLAttributes<HTMLDivElement> {
-//   conversationId?: string;
-// }
 
 export default function ConversationContent() {
   const conversationId = useContext(ConversationIdContext);
@@ -34,7 +29,6 @@ export default function ConversationContent() {
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
       updateConversation(conversationId, body),
     onSuccess: () => {
-      console.log('Update conversation successfully');
       queryClient.invalidateQueries({
         queryKey: ['conversation-list'],
       });
@@ -105,7 +99,7 @@ export default function ConversationContent() {
           </div>
 
           <div className="conversation-action w-full h-16 mb-2 flex justify-center">
-            <Editor />
+            <Editor key={conversationId}/>
           </div>
         </>
       )}

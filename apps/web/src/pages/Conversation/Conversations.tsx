@@ -19,9 +19,9 @@ export default function Conversations() {
         <ConversationFilter onApplyFilter={setFilter} filter={filter} />
         <ConversationList setConversation={setConversationDetail} filterCriteria={filter}/>
       </div>
-      <ConversationIdContext value={conversationDetail}>
+      <ConversationIdContext.Provider value={conversationDetail}>
         <ConversationContent />
-      </ConversationIdContext>
+      </ConversationIdContext.Provider>
     </div>
   );
 }

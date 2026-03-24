@@ -2,8 +2,7 @@ import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMessageDto } from './message.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { markdownToTelegramHtml } from '@message-management/utils';
-// import { convert } from "telegram-markdown-v2";
+import { sanitizeToTelegramHtml } from '@message-management/utils';
 
 @Injectable()
 export class MessageService {
@@ -28,7 +27,7 @@ export class MessageService {
         conversationId,
         fileName: payload.fileName,
         fileUrl: payload.fileUrl,
-        content: payload.content,
+        content: sanitizeToTelegramHtml(payload.content),
         type: payload.type,
         senderType: payload.senderType,
         sentByAdmin: payload.sentByAdmin,
