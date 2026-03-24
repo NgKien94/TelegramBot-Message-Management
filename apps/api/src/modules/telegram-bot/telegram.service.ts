@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
-import { toMarkdownV2 } from '@telegraf/entity';
+import { toHTML, toMarkdownV2 } from '@telegraf/entity';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -63,7 +63,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private botListenMessage() {
     this.bot.on(message('text'), async (ctx) => {
       const { id, username, first_name, last_name } = ctx.from;
-      const content = toMarkdownV2(ctx.message);
+      const content = toHTML(ctx.message);
 
       // update user (username, first_name, last_name)
       const updatedUser = await this.userService.updateUserByTelegramId(String(id), {
@@ -100,7 +100,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   async sendMessageToTelegramUser(payload: { messageId: string; content: string; telegramId: string }) {
     try {
       await this.bot.telegram.sendMessage(payload.telegramId, payload.content, {
-        parse_mode: 'MarkdownV2',
+        parse_mode: 'HTML',
       });
     } catch (error) {
       console.log("Error: ",error);

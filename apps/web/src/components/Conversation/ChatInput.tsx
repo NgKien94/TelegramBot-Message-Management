@@ -31,18 +31,6 @@ export default function ChatInput() {
     setMessage('');
   };
 
-  // const handleOnClickSend = () => {
-  //   if (message) {
-  //     console.log('Client emit create message event: ', message);
-  //     socket.emit('create_message', {
-  //       conversationId: conversationId || '',
-  //       senderType: SenderType.OUTGOING,
-  //       content: message,
-  //       sentByAdmin: true,
-  //     });
-  //   }
-  //   setMessage('');
-  // };
 
   return (
     <div className="flex justify-center items-center gap-5 h-full">

@@ -14,6 +14,7 @@ import {
   UpdateConversationRequest,
 } from '@message-management/types';
 import { ConversationIdContext } from '../../contexts/conversation.context';
+import Editor from '../Editor/Editor';
 
 // interface ConversationContentProps extends React.HTMLAttributes<HTMLDivElement> {
 //   conversationId?: string;
@@ -91,7 +92,7 @@ export default function ConversationContent() {
       {isSuccess && (
         <>
           <UserCard user={data.result.telegramUser} />
-          <div ref={historyRef} className="conversation-history p-5 h-64 overflow-auto flex-1 flex flex-col gap-3">
+          <div ref={historyRef} className="conversation-history p-5 overflow-auto flex-1 flex flex-col gap-3">
             {data &&
               data.result.messages.map((message) => (
                 <MessageBubble
@@ -101,21 +102,10 @@ export default function ConversationContent() {
                   sendTime={new Date(message.createdAt)}
                 />
               ))}
-
-            {/* <MessageBubble
-              senderType="incoming"
-              content="Lorem, ipsum dolor sit amet consectetur adipisicing elit. Architecto laudantium tempore fugit aliquid sapiente debitis dolorum maxime voluptatum delectus quod?
-"
-              sendTime={new Date()}
-            />
-            <MessageBubble
-              senderType="outgoing"
-              content="How are you ?"
-              sendTime={new Date()}
-            /> */}
           </div>
-          <div className="conversation-action w-full h-16 bg-gray-100">
-            <ChatInput />
+
+          <div className="conversation-action w-full h-16 mb-2 flex justify-center">
+            <Editor />
           </div>
         </>
       )}
