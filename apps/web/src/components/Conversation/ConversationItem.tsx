@@ -5,6 +5,7 @@ import { updateConversation } from '@message-management/client';
 import { toast } from 'react-toastify';
 import { MouseEvent } from 'react';
 import clsx from 'clsx';
+import { removeAllHTMLTagToText } from '@message-management/utils';
 
 interface ConversationItemProps extends React.HTMLAttributes<HTMLDivElement> {
   conversation: Conversation;
@@ -65,7 +66,7 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
             {conversation.lastMessage.senderType === 'INCOMING'
               ? `${conversation.telegramUser.username || conversation.telegramUser.telegramID}: `
               : 'System: '}
-            {conversation.lastMessage.type === 'FILE' ? 'Sent a file' : conversation.lastMessage.content}
+            {conversation.lastMessage.type === 'FILE' ? 'Sent a file' : removeAllHTMLTagToText(conversation.lastMessage.content)}
           </p>
           <div className="flex gap-2 text-xl justify-center items-center group">
             {conversation.status === 'OPEN' ? (

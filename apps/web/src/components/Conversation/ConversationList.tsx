@@ -22,7 +22,6 @@ export default function ConversationList({ setConversation, filterCriteria, ...r
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
       updateConversation(conversationId, body),
     onSuccess: () => {
-      console.log('Update conversation successfully');
       queryClient.invalidateQueries({
         queryKey: ['conversation-list'],
       });

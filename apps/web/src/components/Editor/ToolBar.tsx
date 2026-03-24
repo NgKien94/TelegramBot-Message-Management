@@ -11,13 +11,14 @@ interface ToolBarProps extends HTMLAttributes<HTMLDivElement> {
   editor: Editor;
 }
 
-export default function ToolBar({ editor }: ToolBarProps) {
+export default function ToolBar({ editor, ...rest }: ToolBarProps) {
   if (!editor) return null;
 
   return (
     <BubbleMenu editor={editor}
     options={{ placement: 'top', offset: 8, flip: true }}
     className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-lg p-1"
+    {...rest}
     >
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
