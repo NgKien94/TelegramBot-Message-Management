@@ -18,24 +18,31 @@ export class NewQueueProcessor {
     }
 
     const concurrency = this.queueService.getConcurrency();
+    this.queueService.setIsProcessing(true);
 
-    while (this.queueService.getNumberOfJobs() > 0) {
-      let numberOfJobs = this.queueService.getNumberOfJobs();
-      const listJob = [];
-
-      for (let index = 1; index <= Math.min(concurrency, numberOfJobs); index++) {
-        const job = this.queueService.getJobFromQueue();
-        if (job !== undefined) {
-          listJob.push(this.handleJob(job));
-        }
-      }
-
-      await Promise.all(listJob);
-      numberOfJobs -= concurrency;
-    }
+    const promises = Array.from({ length: concurrency }, () => this.runWorker());
+    await Promise.all(promises);
 
     this.queueService.setIsProcessing(false);
     return;
+  }
+
+  async runWorker() {
+    while (true) {
+      const job = this.queueService.getJobFromQueue();
+
+      console.log('Job: ', job);
+      if (job === undefined) {
+        return;
+      }
+      try {
+        await this.handleJob(job); 
+      } catch (error) {
+        console.log("Error when process job: ",error);
+        console.log("Start retry job ");
+        await this.retryJob(job);
+      }
+    }
   }
 
   async handleJob(job: JobTypeOfNewQueue) {
@@ -48,5 +55,26 @@ export class NewQueueProcessor {
         ...payload,
       });
     }
+  }
+
+  async retryJob(job: JobTypeOfNewQueue) {
+    let retryCounter = this.queueService.getRetryCounterConfig();
+    let isFailed = true;
+
+    while (retryCounter > 0 && isFailed === true) {
+      try {
+        retryCounter--;
+        await this.handleJob(job);
+        isFailed = false;
+      } catch (error) {
+        console.log('Error when retry: ', error);
+      }
+    }
+
+    if (isFailed === true) {
+      console.log('Job failed after all retry turn');
+    }
+
+    console.log('Job success after retry');
   }
 }
