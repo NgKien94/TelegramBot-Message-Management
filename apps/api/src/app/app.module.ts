@@ -21,6 +21,7 @@ import { SocketModule } from '../modules/socket/socket.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
 import { QueueModule } from '../modules/queue/queue.module';
+import { NewQueueModule } from '../modules/new-queue/new-queue.module';
 
 @Module({
   imports: [
@@ -28,12 +29,12 @@ import { QueueModule } from '../modules/queue/queue.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT)
-      }
-    }),
+    // BullModule.forRoot({
+    //   connection: {
+    //     host: process.env.REDIS_HOST,
+    //     port: parseInt(process.env.REDIS_PORT)
+    //   }
+    // }),
     QueueModule,
     EventEmitterModule.forRoot(),
     PrismaModule,
@@ -42,6 +43,7 @@ import { QueueModule } from '../modules/queue/queue.module';
     TelegramModule,
     ConversationModule,
     SocketModule,
+    NewQueueModule,
   ],
   controllers: [AppController],
   providers: [
