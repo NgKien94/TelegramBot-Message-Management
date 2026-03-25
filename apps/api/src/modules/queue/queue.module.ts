@@ -7,9 +7,9 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'broadcast',
-    }),
+    // BullModule.registerQueue({
+    //   name: 'broadcast',
+    // }),
     UserModule,
     MessageModule,
   ],

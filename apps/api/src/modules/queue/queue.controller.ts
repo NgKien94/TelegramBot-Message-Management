@@ -9,28 +9,28 @@ import { SendMessageJobType } from './queue.type';
 @Controller('broadcast')
 export class QueueController {
   constructor(
-    @InjectQueue('broadcast') private readonly queue: Queue<SendMessageJobType>,
+    // @InjectQueue('broadcast') private readonly queue: Queue<SendMessageJobType>,
     private readonly usersService: UserService,
   ) {}
 
-  @Post('messages')
-  async sendMessagesJob(@Body() body: CreateMessageOfQueueDto) {
-    const {conversationIds, ...rest} = body
+  // @Post('messages')
+  // async sendMessagesJob(@Body() body: CreateMessageOfQueueDto) {
+  //   const {conversationIds, ...rest} = body
 
-    await this.queue.addBulk(
-      conversationIds.map( conversationId => {
-        return {
-          name: 'send-messages-job',
-          data: {
-            conversationId,
-            payload: {
-              ...rest,
-              senderType: SenderType.OUTGOING,
-              sentByAdmin: true
-            }
-          }
-        }
-      })
-    )
-  }
+  //   await this.queue.addBulk(
+  //     conversationIds.map( conversationId => {
+  //       return {
+  //         name: 'send-messages-job',
+  //         data: {
+  //           conversationId,
+  //           payload: {
+  //             ...rest,
+  //             senderType: SenderType.OUTGOING,
+  //             sentByAdmin: true
+  //           }
+  //         }
+  //       }
+  //     })
+  //   )
+  // }
 }
