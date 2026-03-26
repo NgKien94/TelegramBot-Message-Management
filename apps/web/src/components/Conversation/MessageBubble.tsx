@@ -5,21 +5,25 @@ interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   senderType: string;
   content?: string;
   sendTime: Date;
-  fileUrl?: string;
+  fileUrl: string | null;
 }
 
 export default function MessageBubble({ senderType, content, sendTime, fileUrl }: MessageBubbleProps) {
   return (
     <div className={clsx('flex', senderType === 'INCOMING' ? 'justify-start' : 'justify-end')}>
-      <div className="relative inline-block max-w-sm p-2 pb-3 pr-14 bg-[var(--primary-color)] text-white rounded-md">
-        {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content}} />}
-        {/* {content && <p className="text-sm break-words">{content}</p>} */}
-
-        <div>
-          {fileUrl && <img src={fileUrl} className="max-w-40 max-h-40 object-contain" alt="File" />}
-        </div>
-
-        <span className="absolute bottom-1 right-2 text-[0.625rem] text-gray-300">{sendTime.toLocaleTimeString()}</span>
+      <div className="flex flex-col items-start gap-y-0.5">
+        {content && (
+          <div className="inline-block max-w-sm min-w-10 p-2 bg-[var(--primary-color)] text-white rounded-md">
+            {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content }} />}
+            {fileUrl && <img src={fileUrl} className="w-16 h-16 rounded-md  object-cover" alt="File" />}
+          </div>
+        )}
+        {fileUrl && (
+          <div>
+            <img src={fileUrl} className="w-16 h-16 rounded-md  object-cover" alt="File" />
+          </div>
+        )}
+        <span className="ml-1 text-[0.625rem] text-gray-400">{sendTime.toLocaleTimeString()}</span>
       </div>
     </div>
   );

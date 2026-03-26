@@ -7,6 +7,7 @@ import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
 import { toHTML } from '@telegraf/entity';
 import { WelcomeMessageService } from '../welcome-message/welcome-message.service';
+import { downloadToBase64 } from '@message-management/utils';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -20,6 +21,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const token = this.configService.get<string>('BOT_TOKEN');
+
     this.bot = new Telegraf(token);
 
     // bot onListener handlers
@@ -36,7 +38,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private botOnListenHandler() {
     this.botOnStart();
-    this.botListenMessage();
+    this.botOnReceiveTextMessage();
+    this.botOnReceiveImageMessage();
   }
 
   private botOnStart() {
@@ -61,7 +64,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private botListenMessage() {
+  private botOnReceiveTextMessage() {
     this.bot.on(message('text'), async (ctx) => {
       const { id, username, first_name, last_name } = ctx.from;
       const content = toHTML(ctx.message);
@@ -73,23 +76,45 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         lastname: last_name,
       });
 
-      await this.chatService.handleTelegramUserSendMessage(updatedUser.id, content);
+      await this.chatService.handleTelegramUserSendTextMessage(updatedUser.id, content);
+    });
+  }
+
+  private botOnReceiveImageMessage() {
+    this.bot.on(message('photo'), async (ctx) => {
+      const photos = ctx.message.photo;
+      const fileId = photos[0].file_id;
+
+      // Gọi Telegram API để lấy file path
+      const fileLink = await ctx.telegram.getFileLink(fileId);
+      const resultUrl = await downloadToBase64(fileLink.href);
+
+      const { id, username, first_name, last_name } = ctx.from;
+
+      const updatedUser = await this.userService.updateUserByTelegramId(String(id), {
+        username,
+        firstname: first_name,
+        lastname: last_name,
+      });
+
+      await this.chatService.handleTelegramUserSendImage(updatedUser.id, resultUrl)
     });
   }
 
   private async getAvatarTelegramUser(telegramId: number): Promise<string | undefined> {
     try {
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500));
 
       const photos = (await Promise.race([this.bot.telegram.getUserProfilePhotos(telegramId), timeout])) as any;
       if (!photos.total_count) {
         return undefined;
       }
 
-      const fileId = photos.photos[0].at(-1).file_id;
+      const fileId = photos.photos[0].at(0).file_id;
       const file = (await Promise.race([this.bot.telegram.getFile(fileId), timeout])) as any;
 
-      const avatarUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+      const originAvatarUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+      const avatarUrl = await downloadToBase64(originAvatarUrl);
       return avatarUrl;
     } catch (error) {
       console.log('Error from Telegram API: ', error);

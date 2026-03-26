@@ -94,6 +94,7 @@ export default function ConversationContent() {
                   senderType={message.senderType}
                   content={message.content}
                   sendTime={new Date(message.createdAt)}
+                  fileUrl={message.fileUrl}
                 />
               ))}
           </div>
