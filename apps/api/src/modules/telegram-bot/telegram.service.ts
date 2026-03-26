@@ -5,7 +5,8 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
-import { toHTML, toMarkdownV2 } from '@telegraf/entity';
+import { toHTML } from '@telegraf/entity';
+import { WelcomeMessageService } from '../welcome-message/welcome-message.service';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -14,6 +15,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly chatService: ChatService,
+    private readonly welcomeMessageService: WelcomeMessageService,
   ) {}
 
   async onModuleInit() {
@@ -38,11 +40,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   private botOnStart() {
-    // replace later
-    const WELCOME_MESSAGE = 'Welcome';
-
     this.bot.start(async (ctx) => {
-      ctx.reply(WELCOME_MESSAGE);
+      const { value: welcomeMessageValue } = await this.welcomeMessageService.getWelcomeMessage();
+
+      ctx.reply(welcomeMessageValue);
 
       const { id, username, first_name, last_name } = ctx.from;
 
@@ -56,7 +57,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         avatarUrl: telegramUserAvatar,
       });
 
-      await this.chatService.handleStartConversation(telegramUser.id, WELCOME_MESSAGE);
+      await this.chatService.handleStartConversation(telegramUser.id, welcomeMessageValue);
     });
   }
 
@@ -103,7 +104,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         parse_mode: 'HTML',
       });
     } catch (error) {
-      console.log("Error: ",error);
+      console.log('Error: ', error);
       //fallback plain Text if send markdown message failed
       await this.bot.telegram.sendMessage(payload.telegramId, payload.content);
     }

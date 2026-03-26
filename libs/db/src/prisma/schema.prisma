@@ -49,6 +49,7 @@ model TelegramUser {
 
 model WelcomeMessage {
   id String @id @default(auto()) @map("_id") @db.ObjectId
+  singleton String @unique @default("default")
   value String
 
   @@map("welcomemessage")
