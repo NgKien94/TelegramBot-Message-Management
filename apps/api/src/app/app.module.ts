@@ -22,6 +22,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
 import { QueueModule } from '../modules/queue/queue.module';
 import { NewQueueModule } from '../modules/new-queue/new-queue.module';
+import { WelcomeMessageModule } from '../modules/welcome-message/welcome-message.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { NewQueueModule } from '../modules/new-queue/new-queue.module';
     ConversationModule,
     SocketModule,
     NewQueueModule,
+    WelcomeMessageModule,
   ],
   controllers: [AppController],
   providers: [
