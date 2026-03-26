@@ -50,3 +50,8 @@ export type SendMessageBroadcastRequest = {
   type?: MessageType;
   conversationIds: string[]
 };
+
+// ==============WELCOME MESSAGE============
+export type UpdateWelcomeMessageRequest = {
+  message: string
+}

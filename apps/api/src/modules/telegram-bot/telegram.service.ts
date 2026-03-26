@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { ChatService } from '../chat/chat.service';
 import { message } from 'telegraf/filters';
 import { OnEvent } from '@nestjs/event-emitter';
-import { toHTML, toMarkdownV2 } from '@telegraf/entity';
+import { toHTML } from '@telegraf/entity';
 import { WelcomeMessageService } from '../welcome-message/welcome-message.service';
 
 @Injectable()

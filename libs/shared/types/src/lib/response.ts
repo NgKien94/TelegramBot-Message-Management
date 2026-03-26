@@ -75,6 +75,12 @@ export type Messages = {
   createdAt: string;
 };
 
+// ======================WELCOME MESSAGE==============
+export type WelcomeMessage = {
+  id: string
+  value: string
+}
+
 // ============== Users=================
 export type TelegramUser = {
   telegramID: string;
