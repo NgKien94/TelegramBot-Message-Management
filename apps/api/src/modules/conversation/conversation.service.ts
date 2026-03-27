@@ -105,7 +105,6 @@ export class ConversationService {
         id: conversationId,
       },
       data: {
-        userId: payload.userId,
         isReadByAdmin: payload.isReadByAdmin,
         status: payload.status,
         lastMessageId: payload.lastMessageId,
