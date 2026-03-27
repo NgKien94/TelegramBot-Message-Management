@@ -75,6 +75,8 @@
     "@radix-ui/themes": "^3.3.0",
     "@tanstack/react-query": "^5.90.21",
     "@telegraf/entity": "^0.7.0",
+    "@tiptap/extension-character-count": "^3.20.5",
+    "@tiptap/extension-image": "^3.20.5",
     "@tiptap/pm": "^3.20.4",
     "@tiptap/react": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",

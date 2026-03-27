@@ -42,16 +42,26 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
   return (
     <div
       {...rest}
-      className={clsx(" hover:bg-gray-100 hover:cursor-pointer hover:shadow p-2  hover:translate-x-1 hover:rounded-md transition-all duration-200 ease-linear w-full flex justify-start items-center gap-2"
-, conversation.isReadByAdmin ? ' border border-gray-200 rounded-lg': ' border border-blue-400 rounded-lg bg-gray-50')} >
+      className={clsx(
+        ' hover:bg-gray-100 hover:cursor-pointer hover:shadow p-2  hover:translate-x-1 hover:rounded-md transition-all duration-200 ease-linear w-full flex justify-start items-center gap-2',
+        conversation.isReadByAdmin
+          ? ' border border-gray-200 rounded-lg'
+          : ' border border-blue-400 rounded-lg bg-gray-50',
+      )}
+    >
       <img
-        className={clsx("object-cover w-14 h-14 rounded-full")}
+        className={clsx('object-cover w-14 h-14 rounded-full')}
         src={conversation.telegramUser.avatarUrl}
         alt={conversation.telegramUser.username || conversation.telegramUser.telegramID}
       />
       <div className="card-info flex-1 flex flex-col">
         <div className="card-header flex justify-between items-center">
-          <p className={clsx("text-sm ", conversation.isReadByAdmin ? ' font-semibold' :' text-[var(--primary-color)] font-bold')}>
+          <p
+            className={clsx(
+              'text-sm ',
+              conversation.isReadByAdmin ? ' font-semibold' : ' text-[var(--primary-color)] font-bold',
+            )}
+          >
             {conversation.telegramUser.username || conversation.telegramUser.telegramID}
           </p>
           <p className="text-gray-500 text-sm">
@@ -66,7 +76,9 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
             {conversation.lastMessage.senderType === 'INCOMING'
               ? `${conversation.telegramUser.username || conversation.telegramUser.telegramID}: `
               : 'System: '}
-            {conversation.lastMessage.type === 'FILE' ? 'Sent a file' : removeAllHTMLTagToText(conversation.lastMessage.content)}
+            {Boolean(conversation.lastMessage.content) === false
+              ? 'Sent a file'
+              : removeAllHTMLTagToText(conversation.lastMessage.content)}
           </p>
           <div className="flex gap-2 text-xl justify-center items-center group">
             {conversation.status === 'OPEN' ? (

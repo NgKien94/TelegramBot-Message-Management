@@ -115,7 +115,7 @@ export class ChatService {
 
     // add newest message from Telegram user
     const newMessage = await this.messageService.addMessageIntoConversation(conversation.id, {
-      fileUrl,
+      fileUrls: [fileUrl],
       type: MessageType.FILE,
       senderType: SenderType.INCOMING,
       sentByAdmin: false,

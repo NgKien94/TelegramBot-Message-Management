@@ -1,32 +1,32 @@
 import { MessageType, SenderType } from '@message-management/types';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateMessageDto {
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  fileUrls?: string[];
 
   @IsOptional()
   @IsString()
-  fileUrl ?: string
+  fileName?: string;
 
   @IsOptional()
   @IsString()
-  fileName ?: string
-
-  @IsOptional()
-  @IsString()
-  content ?: string
+  content?: string;
 
   @IsOptional()
   @IsEnum(MessageType)
-  type ?: MessageType
+  type?: MessageType;
 
   @IsNotEmpty()
   @IsEnum(SenderType)
-  senderType : SenderType
+  senderType: SenderType;
 
   @IsBoolean()
-  sentByAdmin : boolean
+  sentByAdmin: boolean;
 
   @IsString()
   @IsNotEmpty()
-  conversationId : string
+  conversationId: string;
 }

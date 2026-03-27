@@ -8,6 +8,8 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { toHTML } from '@telegraf/entity';
 import { WelcomeMessageService } from '../welcome-message/welcome-message.service';
 import { downloadToBase64 } from '@message-management/utils';
+import { MessageService } from '../message/message.service';
+import { MediaGroup } from 'telegraf/typings/telegram-types';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -17,6 +19,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private readonly userService: UserService,
     private readonly chatService: ChatService,
     private readonly welcomeMessageService: WelcomeMessageService,
+    private readonly messageService: MessageService,
   ) {}
 
   async onModuleInit() {
@@ -97,7 +100,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         lastname: last_name,
       });
 
-      await this.chatService.handleTelegramUserSendImage(updatedUser.id, resultUrl)
+      await this.chatService.handleTelegramUserSendImage(updatedUser.id, resultUrl);
     });
   }
 
@@ -123,15 +126,45 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   @OnEvent('message.outgoing.created')
-  async sendMessageToTelegramUser(payload: { messageId: string; content: string; telegramId: string }) {
+  async sendMessageToTelegramUser(payload: { messageId: string; telegramId: string }) {
+    const messageDetail = await this.messageService.getMessageDetail(payload.messageId);
     try {
-      await this.bot.telegram.sendMessage(payload.telegramId, payload.content, {
-        parse_mode: 'HTML',
-      });
+      if (messageDetail.fileUrls.length > 0) {
+        const lastIndex = messageDetail.fileUrls.length - 1;
+
+        const mediaGroup: MediaGroup = messageDetail.fileUrls.map((fileItem, index) => {
+          const base64Data = fileItem.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          return {
+            type: 'photo',
+            media: { source: buffer },
+            ...(index === lastIndex && messageDetail.content
+              ? { caption: messageDetail.content, parse_mode: 'HTML' }
+              : {}),
+          };
+        });
+
+        // for (const fileItem of messageDetail.fileUrls) {
+        //   const base64Data = fileItem.replace(/^data:image\/\w+;base64,/, '');
+        //   const buffer = Buffer.from(base64Data, 'base64');
+        //   await this.bot.telegram.sendPhoto(payload.telegramId, { source: buffer });
+        // }
+        await this.bot.telegram.sendMediaGroup(payload.telegramId, mediaGroup);
+      } else {
+        await this.bot.telegram.sendMessage(payload.telegramId, messageDetail.content, {
+          parse_mode: 'HTML',
+        });
+      }
+
+      // if (messageDetail.content) {
+      //   await this.bot.telegram.sendMessage(payload.telegramId, messageDetail.content, {
+      //     parse_mode: 'HTML',
+      //   });
+      // }
     } catch (error) {
       console.log('Error: ', error);
       //fallback plain Text if send markdown message failed
-      await this.bot.telegram.sendMessage(payload.telegramId, payload.content);
+      await this.bot.telegram.sendMessage(payload.telegramId, messageDetail.content);
     }
 
     await this.chatService.handleSendMessageToTelegramUser(payload.messageId);

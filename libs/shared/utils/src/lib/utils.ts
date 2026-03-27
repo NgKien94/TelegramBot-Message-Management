@@ -1,6 +1,6 @@
 import { ApiResponseFromServer, ValidationErrorResponse } from '@message-management/types';
 import sanitizeHtml from 'sanitize-html';
-import axios from 'axios'
+import axios from 'axios';
 
 export const isApiResponseFromServer = <T>(value: unknown): value is ApiResponseFromServer<T> => {
   return (
@@ -31,7 +31,14 @@ export function removeAllHTMLTagToText(html: string): string {
 }
 
 export const downloadToBase64 = async (url: string): Promise<string> => {
-  const response = await axios.get(url, { responseType: 'arraybuffer' })
-  const base64 = Buffer.from(response.data).toString('base64')
-  return `data:image/jpeg;base64,${base64}`
-}
+  const response = await axios.get(url, { responseType: 'arraybuffer' });
+  const base64 = Buffer.from(response.data).toString('base64');
+  return `data:image/jpeg;base64,${base64}`;
+};
+
+export const toBase64FromBlob = (blob: Blob): Promise<string> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
