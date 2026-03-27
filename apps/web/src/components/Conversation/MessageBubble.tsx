@@ -30,7 +30,7 @@ export default function MessageBubble({ senderType, content, sendTime, fileUrls 
         )}
         {/* Content */}
         {content && (
-          <div className="inline-block self-end max-w-sm min-w-10 p-2 bg-[var(--primary-color)] text-white rounded-md">
+          <div className={clsx("inline-block max-w-sm min-w-10 p-2 bg-[var(--primary-color)] text-white rounded-md",  senderType === 'INCOMING' ? 'self-start' : 'self-end')}>
             {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content }} />}
           </div>
         )}

@@ -10,10 +10,20 @@ import { WelcomeMessageService } from '../welcome-message/welcome-message.servic
 import { downloadToBase64 } from '@message-management/utils';
 import { MessageService } from '../message/message.service';
 import { MediaGroup } from 'telegraf/typings/telegram-types';
+import { Message } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private bot: Telegraf;
+  private mapReceivedImages: Map<
+    string,
+    {
+      userId: string;
+      caption?: string;
+      fileUrls: string[];
+      timer: NodeJS.Timeout;
+    }
+  >;
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UserService,
@@ -24,6 +34,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const token = this.configService.get<string>('BOT_TOKEN');
+    this.mapReceivedImages = new Map<
+      string,
+      {
+        userId: string;
+        caption?: string;
+        fileUrls: string[];
+        timer: NodeJS.Timeout;
+      }
+    >();
 
     this.bot = new Telegraf(token);
 
@@ -86,11 +105,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private botOnReceiveImageMessage() {
     this.bot.on(message('photo'), async (ctx) => {
       const photos = ctx.message.photo;
+      const caption = toHTML(ctx.message as Message.PhotoMessage);
+      const mediaGroupId = (ctx.message as Message.PhotoMessage).media_group_id;
+
       const fileId = photos[0].file_id;
+      console.log('Caption: ', caption);
 
       // Gọi Telegram API để lấy file path
       const fileLink = await ctx.telegram.getFileLink(fileId);
       const resultUrl = await downloadToBase64(fileLink.href);
+      console.log('ResultUrl: ', resultUrl);
 
       const { id, username, first_name, last_name } = ctx.from;
 
@@ -100,7 +124,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         lastname: last_name,
       });
 
-      await this.chatService.handleTelegramUserSendImage(updatedUser.id, resultUrl);
+
+      if (!mediaGroupId) {
+        await this.chatService.handleTelegramUserSendImages(updatedUser.id, [resultUrl],caption);
+      } else {
+        console.log('Caption: ', caption);
+        this.sendMediaGroup(mediaGroupId, updatedUser.id, caption, resultUrl);
+      }
     });
   }
 
@@ -125,6 +155,33 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  private sendMediaGroup(mediaGroupId: string, userId: string, caption: string, fileUrl: string) {
+    const hasMediaGroupId = this.mapReceivedImages.has(mediaGroupId);
+
+    if (hasMediaGroupId) {
+      clearTimeout(this.mapReceivedImages.get(mediaGroupId).timer);
+    } else {
+      this.mapReceivedImages.set(mediaGroupId, {
+        userId,
+        fileUrls: [],
+        caption: undefined,
+        timer: null,
+      });
+    }
+
+    const group = this.mapReceivedImages.get(mediaGroupId);
+    group.fileUrls.push(fileUrl);
+    if (caption) {
+      group.caption = caption;
+    }
+
+    group.timer = setTimeout(async () => {
+      this.mapReceivedImages.delete(mediaGroupId);
+
+      await this.chatService.handleTelegramUserSendImages(userId, [...group.fileUrls], group.caption);
+    }, 500);
+  }
+
   @OnEvent('message.outgoing.created')
   async sendMessageToTelegramUser(payload: { messageId: string; telegramId: string }) {
     const messageDetail = await this.messageService.getMessageDetail(payload.messageId);
@@ -143,24 +200,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               : {}),
           };
         });
-
-        // for (const fileItem of messageDetail.fileUrls) {
-        //   const base64Data = fileItem.replace(/^data:image\/\w+;base64,/, '');
-        //   const buffer = Buffer.from(base64Data, 'base64');
-        //   await this.bot.telegram.sendPhoto(payload.telegramId, { source: buffer });
-        // }
         await this.bot.telegram.sendMediaGroup(payload.telegramId, mediaGroup);
       } else {
         await this.bot.telegram.sendMessage(payload.telegramId, messageDetail.content, {
           parse_mode: 'HTML',
         });
       }
-
-      // if (messageDetail.content) {
-      //   await this.bot.telegram.sendMessage(payload.telegramId, messageDetail.content, {
-      //     parse_mode: 'HTML',
-      //   });
-      // }
     } catch (error) {
       console.log('Error: ', error);
       //fallback plain Text if send markdown message failed
