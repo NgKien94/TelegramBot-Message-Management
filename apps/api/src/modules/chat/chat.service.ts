@@ -109,13 +109,14 @@ export class ChatService {
     ]);
   }
 
-    async handleTelegramUserSendImage(userId: string, fileUrl: string) {
+    async handleTelegramUserSendImages(userId: string,fileUrl: string[], content?: string) {
     // get conversation by userId
     const conversation = await this.conversationService.getOrCreateConversation(userId);
 
     // add newest message from Telegram user
     const newMessage = await this.messageService.addMessageIntoConversation(conversation.id, {
-      fileUrls: [fileUrl],
+      content,
+      fileUrls: [...fileUrl],
       type: MessageType.FILE,
       senderType: SenderType.INCOMING,
       sentByAdmin: false,
