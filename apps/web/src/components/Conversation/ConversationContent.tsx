@@ -94,11 +94,12 @@ export default function ConversationContent() {
                   senderType={message.senderType}
                   content={message.content}
                   sendTime={new Date(message.createdAt)}
+                  fileUrls={message.fileUrls}
                 />
               ))}
           </div>
 
-          <div className="conversation-action w-full h-16 mb-2 flex justify-center">
+          <div className="conversation-action w-full mb-2 flex justify-center">
             <Editor key={conversationId}/>
           </div>
         </>

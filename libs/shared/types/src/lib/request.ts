@@ -34,7 +34,7 @@ export type UpdateConversationRequest = {
 
 // =================MESSAGE================
 export type CreateMessageRequest = {
-  fileUrl?: string;
+  fileUrls?: string[];
   fileName?: string;
   content?: string;
   type?: MessageType;
@@ -44,7 +44,7 @@ export type CreateMessageRequest = {
 };
 
 export type SendMessageBroadcastRequest = {
-  fileUrl?: string;
+  fileUrls?: string[];
   fileName?: string;
   content?: string;
   type?: MessageType;

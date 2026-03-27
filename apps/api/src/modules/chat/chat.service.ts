@@ -66,7 +66,7 @@ export class ChatService {
     ]);
   }
 
-  async handleTelegramUserSendMessage(userId: string, content: string) {
+  async handleTelegramUserSendTextMessage(userId: string, content: string) {
     // get conversation by userId
     const conversation = await this.conversationService.getOrCreateConversation(userId);
 
@@ -108,6 +108,50 @@ export class ChatService {
       { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
     ]);
   }
+
+    async handleTelegramUserSendImage(userId: string, fileUrl: string) {
+    // get conversation by userId
+    const conversation = await this.conversationService.getOrCreateConversation(userId);
+
+    // add newest message from Telegram user
+    const newMessage = await this.messageService.addMessageIntoConversation(conversation.id, {
+      fileUrls: [fileUrl],
+      type: MessageType.FILE,
+      senderType: SenderType.INCOMING,
+      sentByAdmin: false,
+      conversationId: conversation.id,
+    });
+
+    // update conversation
+    await this.conversationService.updateConversation(conversation.id, {
+      isReadByAdmin: false, // Telegram user send messages => conversation status is UNREAD
+      status: ConversationStatus.OPEN,
+      lastMessageId: newMessage.id,
+      lastMessageAt: new Date(),
+    });
+
+    // get detail conversation
+    const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
+
+    // emit socket event for web frontend to realtime conversation
+    this.socketGateway.socketHandleUpdateConversation({
+      id: detailConversation.id,
+      telegramUser: detailConversation.telegramUser,
+      isReadByAdmin: detailConversation.isReadByAdmin,
+      lastMessage: {
+        ...detailConversation.lastMessage,
+        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+      },
+      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
+      status: detailConversation.status,
+    });
+
+    // emit socket event for web frontend to realtime chat history
+    this.socketGateway.socketHandleUpdateChatHistory([
+      { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
+    ]);
+  }
+
 
   async handleSendMessageToTelegramUser(messageId: string) {
     const message = await this.messageService.getMessageDetail(messageId);

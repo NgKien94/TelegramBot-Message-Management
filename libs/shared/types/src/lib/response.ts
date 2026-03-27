@@ -65,7 +65,7 @@ export type ChatHistoryOfConversation = {
 // ==============MESSAGES==============
 export type Messages = {
   id: string;
-  fileUrl: string | null;
+  fileUrls: string[];
   fileName: string | null;
   content: string | undefined;
   type: string;

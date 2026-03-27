@@ -26,7 +26,7 @@ export class MessageService {
       data: {
         conversationId,
         fileName: payload.fileName,
-        fileUrl: payload.fileUrl,
+        fileUrls: payload.fileUrls,
         content: sanitizeToTelegramHtml(payload.content),
         type: payload.type,
         senderType: payload.senderType,
@@ -38,7 +38,8 @@ export class MessageService {
       // emit event messageId, telegramId for telegram service to send message to Telegram user
       this.eventMitter.emit('message.outgoing.created', {
         messageId: message.id,
-        content: message.content,
+        // content: message.content,
+        // fileUrls: message.fileUrls,
         telegramId: isExistConversation.telegramUser.telegramID
       })
 
