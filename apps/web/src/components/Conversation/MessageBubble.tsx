@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { useId } from 'react';
 // import { marked } from 'marked';
 
 interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,31 +9,47 @@ interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default function MessageBubble({ senderType, content, sendTime, fileUrls }: MessageBubbleProps) {
-  const keyId = useId();
+  const isIncoming = senderType === 'INCOMING';
 
   return (
-    <div className={clsx('flex flex-col', senderType === 'INCOMING' ? 'items-start' : 'items-end')}>
+    <div className={clsx('flex flex-col', isIncoming ? 'items-start' : 'items-end')}>
       {/* Time */}
-      <span className={clsx("mb-0.5 text-[0.625rem] text-slate-500",  senderType === 'INCOMING' ? 'self-start' : 'self-end')}>{sendTime.toLocaleTimeString()}</span>
-      {/* Messages */}
-      <div className="flex flex-col items-start gap-y-2">
-        {/* File urls */}
+      <span
+        className='mb-0.5 text-[0.625rem] text-slate-500'
+      >
+        {sendTime.toLocaleTimeString()}
+      </span>
+
+      {/* Bubble */}
+      <div
+        className={clsx(
+          "flex flex-col gap-2 max-w-sm p-2 rounded-2xl",
+          isIncoming
+            ? "bg-slate-200 text-black rounded-bl-sm"
+            : "bg-[var(--primary-color)] text-white rounded-br-sm"
+        )}
+      >
+        {/* Images */}
         {fileUrls.length > 0 && (
-          <div className='grid grid-cols-2 gap-2'>
+          <div className="grid grid-cols-2 gap-1 ">
             {fileUrls.map((item) => (
-              <div key={keyId} className={clsx(senderType === 'INCOMING' ? '' : 'only:col-start-2')}>
-                <img src={item} className="w-32 h-32 rounded-md  object-cover" alt="File" />
-              </div>
+              <img
+                key={item}
+                src={item}
+                className="w-32 h-32 object-cover rounded-lg"
+                alt="File"
+              />
             ))}
           </div>
         )}
-        {/* Content */}
-        {content && (
-          <div className={clsx("inline-block max-w-sm min-w-10 p-2 bg-[var(--primary-color)] text-white rounded-md",  senderType === 'INCOMING' ? 'self-start' : 'self-end')}>
-            {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content }} />}
-          </div>
-        )}
 
+        {/* Text */}
+        {content && (
+          <p
+            className="text-sm break-words"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        )}
       </div>
     </div>
   );
