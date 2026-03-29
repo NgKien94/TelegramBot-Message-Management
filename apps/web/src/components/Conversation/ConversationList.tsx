@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ConversationItem from './ConversationItem';
 import { getConversationsList, socket, updateConversation } from '@message-management/client';
-import { Dispatch, SetStateAction, useEffect } from 'react';
-// import { socket } from '../../socket';
+import {  useEffect } from 'react';
 
 import {
   ApiDataForClient,
@@ -10,13 +9,15 @@ import {
   GetConversationRequest,
   UpdateConversationRequest,
 } from '@message-management/types';
+import { useNavigate } from 'react-router-dom';
 
 interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
-  setConversation: Dispatch<SetStateAction<string | undefined>>;
   filterCriteria: GetConversationRequest;
 }
 
-export default function ConversationList({ setConversation, filterCriteria, ...rest }: ConversationListProps) {
+export default function ConversationList({  filterCriteria, ...rest }: ConversationListProps) {
+  const navigate = useNavigate()
+
   const queryClient = useQueryClient();
   const updateConversationMutation = useMutation({
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
@@ -68,7 +69,7 @@ export default function ConversationList({ setConversation, filterCriteria, ...r
   });
 
   const handleOnClickConversationItem = (conversationId: string) => () => {
-    setConversation(conversationId);
+    navigate(`/conversations/${conversationId}`)
     updateConversationMutation.mutate({
       conversationId: conversationId as string,
       body: {

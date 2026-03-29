@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-// import { marked } from 'marked';
 
 interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   senderType: string;
@@ -14,42 +13,29 @@ export default function MessageBubble({ senderType, content, sendTime, fileUrls 
   return (
     <div className={clsx('flex flex-col', isIncoming ? 'items-start' : 'items-end')}>
       {/* Time */}
-      <span
-        className='mb-0.5 text-[0.625rem] text-slate-500'
-      >
-        {sendTime.toLocaleTimeString()}
-      </span>
+      <span className="mb-0.5 text-[0.625rem] text-slate-500">{sendTime.toLocaleTimeString()}</span>
 
       {/* Bubble */}
       <div
         className={clsx(
-          "flex flex-col gap-2 max-w-sm p-2 rounded-2xl",
-          isIncoming
-            ? "bg-slate-200 text-black rounded-bl-sm"
-            : "bg-[var(--primary-color)] text-white rounded-br-sm"
+          'flex flex-col gap-2 max-w-sm p-2 rounded-2xl',
+          isIncoming ? 'bg-slate-200 text-black rounded-bl-sm' : 'bg-[var(--primary-color)] text-white rounded-br-sm',
         )}
       >
         {/* Images */}
-        {fileUrls.length > 0 && (
-          <div className="grid grid-cols-2 gap-1 ">
-            {fileUrls.map((item) => (
-              <img
-                key={item}
-                src={item}
-                className="w-32 h-32 object-cover rounded-lg"
-                alt="File"
-              />
-            ))}
-          </div>
-        )}
+        <div className={clsx('grid gap-1', fileUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2')}>
+          {fileUrls.map((item) => (
+            <img
+              key={item}
+              src={item}
+              className={clsx('object-cover rounded-lg', fileUrls.length === 1 ? 'w-40 h-40' : 'w-32 h-32')}
+              alt="File"
+            />
+          ))}
+        </div>
 
         {/* Text */}
-        {content && (
-          <p
-            className="text-sm break-words"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        )}
+        {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content }} />}
       </div>
     </div>
   );

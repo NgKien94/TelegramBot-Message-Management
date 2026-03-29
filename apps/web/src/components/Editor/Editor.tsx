@@ -29,7 +29,8 @@ const createCustomEnter = (onSubmit: () => void) =>
 export default function Editor() {
   const conversationId = useContext(ConversationIdContext);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [charCounter, setCharCounter] = useState<number>(0)
+  const [charCounter, setCharCounter] = useState<number>(0);
+  const handleSubmitRef = useRef<(() => Promise<void>) | null>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,6 +100,8 @@ export default function Editor() {
     editor.commands.clearContent();
   };
 
+  handleSubmitRef.current = handleSubmit;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -111,11 +114,11 @@ export default function Editor() {
       CharacterCount.configure({
         limit: MAX_LENGTH,
       }),
-      createCustomEnter(handleSubmit),
+      createCustomEnter(() => handleSubmitRef.current?.()),
     ],
-    onUpdate({editor}) {
-      setCharCounter(editor.storage.characterCount.characters())
-    }
+    onUpdate({ editor }) {
+      setCharCounter(editor.storage.characterCount.characters());
+    },
   });
 
   return (
@@ -138,9 +141,7 @@ export default function Editor() {
           >
             <LuImagePlus size={16} />
           </button>
-          <span
-            className={`text-xs ${charCounter >= MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}
-          >
+          <span className={`text-xs ${charCounter >= MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
             {charCounter}/{MAX_LENGTH}
           </span>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
