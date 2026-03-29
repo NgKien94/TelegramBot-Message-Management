@@ -2,8 +2,11 @@ import { Badge } from '@radix-ui/themes';
 import { EyeOpenIcon } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { getUsers } from '@message-management/client';
+import { useNavigate } from 'react-router-dom';
 
 export default function Users() {
+  const navigate = useNavigate()
+
   const { isSuccess, data } = useQuery({
     queryKey: ['users'],
     queryFn: () => getUsers(),
@@ -32,7 +35,7 @@ export default function Users() {
                   <td className="border border-gray-400 px-4 py-2">{item.firstName ? item.firstName: <span className='text-red-500'>Not register</span>}</td>
                   <td className="border border-gray-400 px-4 py-2">{item.lastName ? item.lastName: <span className='text-red-500'>Not register</span>}</td>
                   <td className="border border-gray-400 px-4 py-2 cursor-pointer">
-                    <Badge color="green" size="2">
+                    <Badge color="green" size="2" onClick={() => navigate(`/conversations/${item.conversation.id}`)}>
                       <EyeOpenIcon />
                       View conversation
                     </Badge>
