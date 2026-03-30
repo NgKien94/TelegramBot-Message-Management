@@ -19,7 +19,7 @@ export default function MessageBubble({ senderType, content, sendTime, fileUrls 
       <div
         className={clsx(
           'flex flex-col gap-2 max-w-sm p-2 rounded-2xl',
-          isIncoming ? 'bg-slate-200 text-black rounded-bl-sm' : 'bg-[var(--primary-color)] text-white rounded-br-sm',
+          isIncoming ? 'bg-slate-100 text-black rounded-bl-sm' : 'bg-[var(--primary-color)] text-white rounded-br-sm',
         )}
       >
         {/* Images */}

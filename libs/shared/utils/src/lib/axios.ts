@@ -3,19 +3,19 @@ import axios, { AxiosHeaders } from 'axios';
 import '../types/axios.ts';
 
 class Http {
-  axiosIntance: AxiosInstance;
+  axiosInstance: AxiosInstance;
   constructor() {
-    this.axiosIntance = axios.create({
-      baseURL: 'http://localhost:3000/api/',
+    this.axiosInstance = axios.create({
+      baseURL: '/',
       timeout: 5000,
       headers: {
         'Content-Type': 'application/json',
       },
-      withCredentials: true
+      withCredentials: true,
     });
 
     // execute before request is sent
-    this.axiosIntance.interceptors.request.use(
+    this.axiosInstance.interceptors.request.use(
       function (config) {
         if (config.skipAuth) {
           return config; // add header skipAuth for public endpoint
@@ -35,7 +35,7 @@ class Http {
       },
     );
 
-    this.axiosIntance.interceptors.response.use(
+    this.axiosInstance.interceptors.response.use(
       function onFullfilled(response) {
         if (response.config.url === 'auth/login' || response.config.url === 'auth/register') {
           const { access_token, refresh_token } = response.data.data;
@@ -74,7 +74,7 @@ class Http {
           const refreshTokenFromStorage = localStorage.getItem('refresh_token');
 
           try {
-            const result = await this.axiosIntance.post<
+            const result = await this.axiosInstance.post<
               unknown,
               {
                 result: {
@@ -96,7 +96,7 @@ class Http {
             // dispatch event change access_token => protected route rerender with new token
             window.dispatchEvent(new CustomEvent('token_refreshed', { detail: newAccessToken }));
 
-            return this.axiosIntance(originalConfig);
+            return this.axiosInstance(originalConfig);
           } catch (errorFromRetry) {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
@@ -109,6 +109,11 @@ class Http {
       },
     );
   }
+
+  setBaseURL(url: string) {
+    this.axiosInstance.defaults.baseURL = url;
+  }
 }
 
-export const http = new Http().axiosIntance;
+export const httpClient = new Http();
+export const http = httpClient.axiosInstance;
