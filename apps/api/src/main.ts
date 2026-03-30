@@ -14,9 +14,9 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
-  
+
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: process.env['CLIENT_URL'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   });

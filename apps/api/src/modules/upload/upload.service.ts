@@ -11,7 +11,7 @@ export class UploadService {
   constructor(private readonly prismaService: PrismaService) {}
 
   handleUpload(file: Express.Multer.File) {
-    const host = process.env['SERVER_HOST'];
+    const host = process.env['VITE_API_BASE_URL'];
     return {
       originalName: file.originalname,
       filename: file.filename,
@@ -35,7 +35,7 @@ export class UploadService {
 
     await pipeline(stream, writeStream);
 
-    const host = process.env['SERVER_HOST'];
+    const host = process.env['VITE_API_BASE_URL'];
     return `${host}/upload/${filename}`;
   }
 }
