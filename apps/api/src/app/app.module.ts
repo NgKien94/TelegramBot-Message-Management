@@ -23,6 +23,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { QueueModule } from '../modules/queue/queue.module';
 import { NewQueueModule } from '../modules/new-queue/new-queue.module';
 import { WelcomeMessageModule } from '../modules/welcome-message/welcome-message.module';
+import { UploadModule } from '../modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { WelcomeMessageModule } from '../modules/welcome-message/welcome-message
     SocketModule,
     NewQueueModule,
     WelcomeMessageModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

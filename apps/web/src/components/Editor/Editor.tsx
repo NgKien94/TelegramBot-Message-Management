@@ -4,7 +4,7 @@ import ToolBar from './ToolBar';
 import { useContext, useRef, useState } from 'react';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import { useMutation } from '@tanstack/react-query';
-import { createMessage } from '@message-management/client';
+import { createMessage, uploadImage } from '@message-management/client';
 import { SenderType } from '@message-management/types';
 import { sanitizeToTelegramHtml, toBase64FromBlob } from '@message-management/utils';
 import Image from '@tiptap/extension-image';
@@ -68,18 +68,33 @@ export default function Editor() {
     divElement.innerHTML = rawHtml;
     const imgElements = divElement.querySelectorAll('img');
 
-    const base64Images: string[] = [];
+    // const base64Images: string[] = [];
 
-    await Promise.all(
+    // await Promise.all(
+    //   Array.from(imgElements).map(async (img) => {
+    //     // fetch object URL
+    //     const response = await fetch(img.src);
+
+    //     // get raw binary data
+    //     const blob = await response.blob();
+
+    //     const base64 = await toBase64FromBlob(blob);
+    //     base64Images.push(base64);
+    //   }),
+    // );
+
+    const fileUrls = await Promise.all(
       Array.from(imgElements).map(async (img) => {
         // fetch object URL
         const response = await fetch(img.src);
 
         // get raw binary data
         const blob = await response.blob();
+        console.log("Blob: ",blob);
 
-        const base64 = await toBase64FromBlob(blob);
-        base64Images.push(base64);
+        const data = await uploadImage(blob)
+        console.log("Data: ",data);
+        return data.result.url
       }),
     );
 
@@ -92,7 +107,7 @@ export default function Editor() {
     createMessageMutation.mutate({
       conversationId: conversationId || '',
       senderType: SenderType.OUTGOING,
-      fileUrls: base64Images,
+      fileUrls,
       content: sanitizedHtml,
       sentByAdmin: true,
     });
