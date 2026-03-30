@@ -11,6 +11,10 @@ import { downloadToBase64 } from '@message-management/utils';
 import { MessageService } from '../message/message.service';
 import { MediaGroup } from 'telegraf/typings/telegram-types';
 import { Message } from 'telegraf/typings/core/types/typegram';
+import { join } from 'path';
+import { createReadStream } from 'fs';
+import axios from 'axios';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
@@ -30,6 +34,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private readonly chatService: ChatService,
     private readonly welcomeMessageService: WelcomeMessageService,
     private readonly messageService: MessageService,
+    private readonly uploadService: UploadService
   ) {}
 
   async onModuleInit() {
@@ -108,13 +113,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const caption = toHTML(ctx.message as Message.PhotoMessage);
       const mediaGroupId = (ctx.message as Message.PhotoMessage).media_group_id;
 
+      console.log("Photos: ",photos);
       const fileId = photos[0].file_id;
       console.log('Caption: ', caption);
 
-      // Gọi Telegram API để lấy file path
+      // Call telegram API to get file path
       const fileLink = await ctx.telegram.getFileLink(fileId);
-      const resultUrl = await downloadToBase64(fileLink.href);
-      console.log('ResultUrl: ', resultUrl);
+      // base64
+      // const resultUrl = await downloadToBase64(fileLink.href);
+
+      // download file and use internal upload api
+      const response = await axios.get(fileLink.href , { responseType: 'stream' });
+      const resultUrl = await this.uploadService.saveFileFromStream(response.data, 'file.jpg');
+
 
       const { id, username, first_name, last_name } = ctx.from;
 
@@ -124,9 +135,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         lastname: last_name,
       });
 
-
       if (!mediaGroupId) {
-        await this.chatService.handleTelegramUserSendImages(updatedUser.id, [resultUrl],caption);
+        await this.chatService.handleTelegramUserSendImages(updatedUser.id, [resultUrl], caption);
       } else {
         console.log('Caption: ', caption);
         this.sendMediaGroup(mediaGroupId, updatedUser.id, caption, resultUrl);
@@ -147,8 +157,15 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const file = (await Promise.race([this.bot.telegram.getFile(fileId), timeout])) as any;
 
       const originAvatarUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
-      const avatarUrl = await downloadToBase64(originAvatarUrl);
-      return avatarUrl;
+      // base64
+      // const avatarUrl = await downloadToBase64(originAvatarUrl);
+      // return avatarUrl;
+
+      // download avatar and use internal upload api
+      const response = await axios.get(originAvatarUrl, { responseType: 'stream' });
+      // const buffer = Buffer.from(response.data);
+      const url = await this.uploadService.saveFileFromStream(response.data, 'avatar.jpg');
+      return url
     } catch (error) {
       console.log('Error from Telegram API: ', error);
       return undefined;
@@ -189,12 +206,25 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       if (messageDetail.fileUrls.length > 0) {
         const lastIndex = messageDetail.fileUrls.length - 1;
 
+        // const mediaGroup: MediaGroup = messageDetail.fileUrls.map((fileItem, index) => {
+        //   const base64Data = fileItem.replace(/^data:image\/\w+;base64,/, '');
+        //   const buffer = Buffer.from(base64Data, 'base64');
+        //   return {
+        //     type: 'photo',
+        //     media: { source: buffer },
+        //     ...(index === lastIndex && messageDetail.content
+        //       ? { caption: messageDetail.content, parse_mode: 'HTML' }
+        //       : {}),
+        //   };
+        // });
+
         const mediaGroup: MediaGroup = messageDetail.fileUrls.map((fileItem, index) => {
-          const base64Data = fileItem.replace(/^data:image\/\w+;base64,/, '');
-          const buffer = Buffer.from(base64Data, 'base64');
+          const fileName = fileItem.split('/').pop();
+          const filePath = join(process.cwd(), 'apps', 'api', 'files', fileName);
+
           return {
             type: 'photo',
-            media: { source: buffer },
+            media: { source: createReadStream(filePath) },
             ...(index === lastIndex && messageDetail.content
               ? { caption: messageDetail.content, parse_mode: 'HTML' }
               : {}),
