@@ -6,6 +6,7 @@ import Login from './pages/Auth/Login';
 import Users from './pages/User/Users';
 import Setting from './pages/Setting/Setting';
 import ProtectedRoute from './pages/Auth/ProtectedRoute';
+import { NotFound } from '@message-management/shared/ui';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
         },
         element: <Login />,
       },
+      {
+        path: '*',
+        element: <NotFound />
+      }
     ],
   },
 ]);
