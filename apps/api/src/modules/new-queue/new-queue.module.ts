@@ -11,7 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
   providers: [{
     provide: NewQueueService,
     useFactory: (eventMitter: EventEmitter2) => {
-      return new NewQueueService(eventMitter,2,3)
+      return new NewQueueService(eventMitter,2,3,10000)
     },
     inject: [EventEmitter2]
   }, NewQueueProcessor],

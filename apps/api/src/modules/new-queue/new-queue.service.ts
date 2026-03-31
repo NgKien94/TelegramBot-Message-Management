@@ -7,12 +7,14 @@ export class NewQueueService<T> {
   private concurrency: number
   private isProcessing: boolean
   private retry: number;
+  private timeout: number
 
-  constructor(private readonly eventMitter: EventEmitter2, concurrency = 1, retry = 1){
+  constructor(private readonly eventMitter: EventEmitter2, concurrency = 1, retry = 1, timeout = 10000){
     this.data = []
     this.concurrency = concurrency
     this.isProcessing = false
     this.retry = retry
+    this.timeout = timeout
   }
 
   addJob(job: T) {
@@ -33,7 +35,7 @@ export class NewQueueService<T> {
     return this.concurrency
   }
 
-  getRetryCounterConfig(): number {
+  getRetry(): number {
     return this.retry
   }
 
@@ -43,6 +45,10 @@ export class NewQueueService<T> {
 
   getIsProcessing(): boolean {
     return this.isProcessing
+  }
+
+  getTimeout(): number {
+    return this.timeout
   }
 
   getJobFromQueue(): T {
