@@ -67,15 +67,15 @@ export class ConversationService {
   }
 
   async getOrCreateConversation(userId: string) {
-    const isExistConversationWithUser = await this.prismaService.conversation.findUnique({
+    const existConversationWithUser = await this.prismaService.conversation.findUnique({
       where: {
         userId,
       },
     });
 
-    if (isExistConversationWithUser) {
+    if (existConversationWithUser) {
       // User has had a conversation
-      return isExistConversationWithUser;
+      return existConversationWithUser;
     }
 
     const newConversation = await this.prismaService.conversation.create({
@@ -90,13 +90,13 @@ export class ConversationService {
   }
 
   async updateConversation(conversationId: string, payload: UpdateConversationDto) {
-    const isExistConversation = await this.prismaService.conversation.findUnique({
+    const existConversation = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId,
       },
     });
 
-    if (!isExistConversation) {
+    if (!existConversation) {
       throw new NotFoundException('Conversation not found');
     }
 
@@ -115,13 +115,13 @@ export class ConversationService {
   }
 
   async getChatHistoryOfConversation(conversationId: string) {
-    const isExistConversation = await this.prismaService.conversation.findUnique({
+    const existConversation = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId,
       },
     });
 
-    if (!isExistConversation) {
+    if (!existConversation) {
       throw new NotFoundException('Conversation not found');
     }
 
