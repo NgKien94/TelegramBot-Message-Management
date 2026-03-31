@@ -1,4 +1,4 @@
-import { Conversation, UpdateConversationRequest } from '@message-management/types';
+import { Conversation, Messages, TelegramUser, UpdateConversationRequest } from '@message-management/types';
 import { BiArchiveOut } from 'react-icons/bi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateConversation } from '@message-management/client';
@@ -10,6 +10,21 @@ import { removeAllHTMLTagToText } from '@message-management/utils';
 interface ConversationItemProps extends React.HTMLAttributes<HTMLDivElement> {
   conversation: Conversation;
 }
+
+const getSenderLabel = (
+  message: Omit<Messages, 'fileUrls' | 'conversationId' | 'createdAt'>,
+  telegramUser: TelegramUser,
+) => {
+  if (message.senderType === 'INCOMING') {
+    return `${telegramUser.username || telegramUser.telegramID}: `;
+  }
+
+  if (message.sentByAdmin) {
+    return 'Admin: ';
+  }
+
+  return 'Bot: ';
+};
 
 export default function ConversationItem({ conversation, ...rest }: ConversationItemProps) {
   const queryClient = useQueryClient();
@@ -73,9 +88,7 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
         </div>
         <div className="card-content flex justify-between items-center">
           <p className="max-w-48 line-clamp-1 text-sm text-gray-500">
-            {conversation.lastMessage.senderType === 'INCOMING'
-              ? `${conversation.telegramUser.username || conversation.telegramUser.telegramID}: `
-              : 'System: '}
+            {getSenderLabel(conversation.lastMessage, conversation.telegramUser)}
             {Boolean(conversation.lastMessage.content) === false
               ? 'Sent photo'
               : removeAllHTMLTagToText(conversation.lastMessage.content)}

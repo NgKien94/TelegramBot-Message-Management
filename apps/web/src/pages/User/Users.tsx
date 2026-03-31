@@ -13,8 +13,8 @@ export default function Users() {
   });
 
   return (
-    <div className="flex justify-center py-10 text-sm">
-      <div className="space-y-5 w-full max-w-2xl">
+    <div className="flex justify-center text-sm">
+      <div className="space-y-5 w-full mt-10 px-5">
         <h2 className="text-2xl text-[var(--primary-color)] font-semibold text-center">User Management</h2>
         <table className="border-collapse border w-full">
           <thead>

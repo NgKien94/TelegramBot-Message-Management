@@ -53,7 +53,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -97,7 +97,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -141,7 +141,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -174,7 +174,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentbyAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
