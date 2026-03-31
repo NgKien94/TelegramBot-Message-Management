@@ -31,50 +31,70 @@ export class NewQueueProcessor {
     while (true) {
       const job = this.queueService.getJobFromQueue();
 
-      console.log('Job: ', job);
+      // console.log('Job: ', job);
       if (job === undefined) {
         return;
       }
+
       try {
-        await this.handleJob(job); 
+        await this.handleJob(job);
       } catch (error) {
-        console.log("Error when process job: ",error);
-        console.log("Start retry job ");
+        console.log('Error when process job: ', error);
+        console.log('Start retry job ');
         await this.retryJob(job);
       }
     }
   }
 
   async handleJob(job: JobTypeOfNewQueue) {
-    console.log('Job raw: ', job);
+    const jobTimeout = this.queueService.getTimeout();
+
     if (job.jobName === 'send-broadcast-message') {
       const { conversationId, payload } = job;
 
-      await this.messageService.addMessageIntoConversation(conversationId, {
-        conversationId,
-        ...payload,
-      });
+      await this.runWithTimeout(
+        (signal) =>
+          this.messageService.addMessageIntoConversation(conversationId, { conversationId, ...payload }, signal),
+        jobTimeout,
+      );
     }
   }
 
   async retryJob(job: JobTypeOfNewQueue) {
-    let retryCounter = this.queueService.getRetryCounterConfig();
+    let retryCounter = this.queueService.getRetry();
     let isFailed = true;
 
     while (retryCounter > 0 && isFailed === true) {
       try {
-        retryCounter--;
         await this.handleJob(job);
         isFailed = false;
       } catch (error) {
-        console.log('Error when retry: ', error);
+        console.log(`Error when attemp ${this.queueService.getRetry() - retryCounter + 1}`, error);
+        retryCounter--;
       }
     }
 
     if (isFailed === true) {
-      console.log('Job failed after all retry turn');
+      console.log('Job failed after all retry turns');
+      return;
     }
 
     console.log('Job success after retry');
+  }
+
+  private runWithTimeout<T>(task: (signal: AbortSignal) => Promise<T>, timeoutMs: number): Promise<T> {
+    const signal = AbortSignal.timeout(timeoutMs); // emit event abort after timeoutMs
+
+    return new Promise<T>((resolve, reject) => {
+      const onAbort = () => reject(signal.reason);
+      signal.addEventListener('abort', onAbort, { once: true });
+
+      task(signal)
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          signal.removeEventListener('abort', onAbort);
+        });
+    });
   }
 }
