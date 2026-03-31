@@ -1,5 +1,5 @@
 import { PrismaService } from '@message-management/db';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class WelcomeMessageService {
@@ -30,7 +30,14 @@ export class WelcomeMessageService {
     })
 
     if(!welcomeMessage) {
-      throw new NotFoundException("Welcome message has not been configured")
+      const newRecord = await this.prismaService.welcomeMessage.create({
+        data: {
+          singleton: 'default',
+          value: 'Hello'
+        }
+      })
+
+      return newRecord
     }
 
     return welcomeMessage

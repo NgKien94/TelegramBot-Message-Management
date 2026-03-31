@@ -75,7 +75,6 @@ model Conversation {
 model Message {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   fileUrls String[]
-  fileName String?
   content String?
   type MessageType @default(TEXT)
   senderType SenderType

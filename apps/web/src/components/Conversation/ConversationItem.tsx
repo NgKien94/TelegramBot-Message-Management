@@ -77,7 +77,7 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
               ? `${conversation.telegramUser.username || conversation.telegramUser.telegramID}: `
               : 'System: '}
             {Boolean(conversation.lastMessage.content) === false
-              ? 'Sent a file'
+              ? 'Sent photo'
               : removeAllHTMLTagToText(conversation.lastMessage.content)}
           </p>
           <div className="flex gap-2 text-xl justify-center items-center group">

@@ -39,7 +39,6 @@ export class MessageService {
     const message = await this.prismaService.message.create({
       data: {
         conversationId,
-        fileName: payload.fileName,
         fileUrls: payload.fileUrls,
         content: sanitizeToTelegramHtml(payload.content),
         type: payload.type,

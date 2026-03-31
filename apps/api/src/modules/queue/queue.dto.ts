@@ -9,10 +9,6 @@ export class CreateMessageOfQueueDto {
 
   @IsOptional()
   @IsString()
-  fileName ?: string
-
-  @IsOptional()
-  @IsString()
   content ?: string
 
   @IsOptional()

@@ -7,24 +7,8 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { json, urlencoded } from 'express';
-import { PrismaClient } from '@prisma/client';
 
 async function bootstrap() {
-  const prisma = new PrismaClient();
-  try {
-    await prisma.welcomeMessage.upsert({
-      where: { singleton: 'default' },
-      update: {},
-      create: {
-        singleton: 'default',
-        value: 'Hello',
-      },
-    });
-    Logger.log(' Welcome message seeded');
-  } finally {
-    await prisma.$disconnect();
-  }
-
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
