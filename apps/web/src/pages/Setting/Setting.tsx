@@ -17,7 +17,7 @@ export default function Setting() {
     enabled: Boolean(access_token),
   });
 
-  const { data: welcomeMessageData } = useQuery({
+  const { data: welcomeMessageData, isSuccess: getWelcomeMessageSuccess } = useQuery({
     queryKey: ['welcome-message'],
     queryFn: () => getWelcomeMessage(),
     enabled: Boolean(access_token),
@@ -28,8 +28,8 @@ export default function Setting() {
     onSuccess: () => {
       toast.success('Update welcome message successfully');
       queryClient.invalidateQueries({
-        queryKey: ['welcome-message']
-      })
+        queryKey: ['welcome-message'],
+      });
     },
     onError: () => {
       toast.error('Update welcome message failed');
@@ -94,20 +94,22 @@ export default function Setting() {
           <h2 className="mb-2 text-base font-semibold text-gray-800">Settings</h2>
 
           {/* Welcome Message */}
-          <div className="p-4 rounded-lg border bg-white divide-y mb-3">
-            <p className="font-medium text-gray-800 mb-2">Welcome message</p>
-            <div className="flex gap-4 justify-between items-center !border-t-0">
-              <TextField.Root
-                className="flex-1"
-                ref={inputRef}
-                key={welcomeMessageData?.result.id}
-                defaultValue={welcomeMessageData?.result.value ?? ''}
-              />
-              <Button size="2" variant="solid" onClick={handleOnChangeWelcomeMessage}>
-                Apply changes
-              </Button>
+          {getWelcomeMessageSuccess && (
+            <div className="p-4 rounded-lg border bg-white divide-y mb-3">
+              <p className="font-medium text-gray-800 mb-2">Welcome message</p>
+              <div className="flex gap-4 justify-between items-center !border-t-0">
+                <TextField.Root
+                  className="flex-1"
+                  ref={inputRef}
+                  key={welcomeMessageData?.result.id}
+                  defaultValue={welcomeMessageData?.result.value ?? ''}
+                />
+                <Button size="2" variant="solid" onClick={handleOnChangeWelcomeMessage}>
+                  Apply changes
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="rounded-lg border bg-white divide-y">
             <div className="p-4 hover:bg-gray-50 cursor-pointer">

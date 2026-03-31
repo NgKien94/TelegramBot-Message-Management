@@ -1,5 +1,5 @@
 import { PrismaService } from '@message-management/db';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class WelcomeMessageService {
@@ -28,6 +28,11 @@ export class WelcomeMessageService {
         singleton: 'default'
       }
     })
+
+    if(!welcomeMessage) {
+      throw new NotFoundException("Welcome message has not been configured")
+    }
+
     return welcomeMessage
   }
 }
