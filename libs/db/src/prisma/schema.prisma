@@ -60,14 +60,15 @@ model Conversation {
   userId String @db.ObjectId @unique
   status ConversationStatus @default(OPEN)
   isReadByAdmin Boolean @default(false)
-  lastMessageId String? @db.ObjectId
+  lastMessageId String? @db.ObjectId @unique
   lastMessageAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   // relation
-  messages Message[]
+  messages Message[] @relation("ConversationMessages")
   telegramUser TelegramUser @relation(fields: [userId],references: [id])
+  lastMessage Message? @relation("ConversationLastMessage",fields: [lastMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("conversations")
 }
@@ -83,7 +84,8 @@ model Message {
   createdAt DateTime @default(now())
 
   // relation
-  conversation Conversation @relation(fields: [conversationId],references: [id])
+  conversation Conversation @relation("ConversationMessages",fields: [conversationId],references: [id])
+  lastMessageOf Conversation? @relation("ConversationLastMessage")
 
   @@map("messages")
 }

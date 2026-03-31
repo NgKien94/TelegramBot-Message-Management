@@ -22,26 +22,12 @@ export class ConversationService {
       },
       include: {
         telegramUser: true,
+        lastMessage: true,
       },
       orderBy: [{ lastMessageAt: 'desc' }, { updatedAt: 'desc' }],
     });
 
-    const listMessageId = conversations.map((item) => item.lastMessageId);
-
-    const messages = await this.prismaService.message.findMany({
-      where: {
-        id: { in: listMessageId },
-      },
-    });
-
-    const mapMessages = new Map(messages.map((message) => [message.id, message]));
-    const result = conversations.map((conversation) => {
-      return {
-        ...conversation,
-        lastMessage: mapMessages.get(conversation.lastMessageId),
-      };
-    });
-    return result;
+    return conversations;
   }
 
   async getDetailConversation(conversationId: string) {
@@ -51,19 +37,11 @@ export class ConversationService {
       },
       include: {
         telegramUser: true,
+        lastMessage: true
       },
     });
 
-    const lastMessage = await this.prismaService.message.findUnique({
-      where: {
-        id: conversation.lastMessageId,
-      },
-    });
-
-    return {
-      lastMessage,
-      ...conversation,
-    };
+    return conversation
   }
 
   async getOrCreateConversation(userId: string) {
