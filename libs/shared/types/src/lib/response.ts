@@ -50,7 +50,7 @@ export type Conversation = {
     id: string;
     content: string;
     type: string;
-    sentbyAdmin: boolean;
+    sentByAdmin: boolean;
     senderType: string;
   };
   lastMessageAt: string;
