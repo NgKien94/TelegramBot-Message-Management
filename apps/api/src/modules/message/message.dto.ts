@@ -9,10 +9,6 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsString()
-  fileName?: string;
-
-  @IsOptional()
-  @IsString()
   content?: string;
 
   @IsOptional()

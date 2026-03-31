@@ -4,7 +4,6 @@ export type SendMessageJobType = {
   conversationId: string;
   payload: {
     fileUrl?: string;
-    fileName?: string;
     content?: string;
     type?: MessageType;
     senderType: SenderType;

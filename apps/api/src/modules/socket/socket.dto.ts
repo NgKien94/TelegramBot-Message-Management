@@ -9,10 +9,6 @@ export class CreateMessageInGatewayDto {
 
   @IsOptional()
   @IsString()
-  fileName ?: string
-
-  @IsOptional()
-  @IsString()
   content ?: string
 
   @IsOptional()
