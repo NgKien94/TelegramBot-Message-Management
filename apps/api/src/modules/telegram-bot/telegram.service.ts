@@ -113,9 +113,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const caption = toHTML(ctx.message as Message.PhotoMessage);
       const mediaGroupId = (ctx.message as Message.PhotoMessage).media_group_id;
 
-      console.log("Photos: ",photos);
-      const fileId = photos[0].file_id;
-      console.log('Caption: ', caption);
+      // console.log("Photos: ",photos);
+      const fileId = photos.at(-1).file_id;
+      // console.log('Caption: ', caption);
 
       // Call telegram API to get file path
       const fileLink = await ctx.telegram.getFileLink(fileId);
