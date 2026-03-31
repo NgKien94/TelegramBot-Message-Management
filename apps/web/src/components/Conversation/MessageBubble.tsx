@@ -1,4 +1,7 @@
 import clsx from 'clsx';
+import { useState } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 
 interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   senderType: string;
@@ -9,6 +12,8 @@ interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export default function MessageBubble({ senderType, content, sendTime, fileUrls }: MessageBubbleProps) {
   const isIncoming = senderType === 'INCOMING';
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const slides = fileUrls.map((url) => ({ src: url }));
 
   return (
     <div className={clsx('flex flex-col', isIncoming ? 'items-start' : 'items-end')}>
@@ -24,18 +29,20 @@ export default function MessageBubble({ senderType, content, sendTime, fileUrls 
       >
         {/* Images */}
         <div className={clsx('grid gap-1', fileUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2')}>
-          {fileUrls.map((item) => (
+          {fileUrls.map((item, index) => (
             <img
               key={item}
               src={item}
               className={clsx('object-cover rounded-lg', fileUrls.length === 1 ? 'w-40 h-40' : 'w-32 h-32')}
               alt="File"
+              onClick={() => setLightboxIndex(index)}
             />
           ))}
         </div>
 
         {/* Text */}
         {content && <p className="text-sm break-words" dangerouslySetInnerHTML={{ __html: content }} />}
+        <Lightbox open={lightboxIndex >= 0} index={lightboxIndex} close={() => setLightboxIndex(-1)} slides={slides} />
       </div>
     </div>
   );
