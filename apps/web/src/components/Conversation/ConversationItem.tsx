@@ -20,7 +20,13 @@ const getSenderLabel = (
   }
 
   if (message.sentByAdmin) {
-    return 'Admin: ';
+    const adminId = localStorage.getItem('id');
+
+    if (message.sentByAdmin.id === adminId) {
+      return 'Admin(You): ';
+    }
+
+    return `Admin(${message.sentByAdmin.name}): `;
   }
 
   return 'Bot: ';

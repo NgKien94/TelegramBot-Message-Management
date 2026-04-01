@@ -50,7 +50,12 @@ export type Conversation = {
     id: string;
     content: string;
     type: string;
-    sentByAdmin: boolean;
+    sentByAdmin:
+      | null
+      | {
+          id: string;
+          name: string;
+        };
     senderType: string;
   };
   lastMessageAt: string;
@@ -69,16 +74,21 @@ export type Messages = {
   content: string | undefined;
   type: string;
   senderType: string;
-  sentByAdmin: boolean;
+  sentByAdmin:
+    | null
+    | {
+        id: string;
+        name: string;
+      };
   conversationId: string;
   createdAt: string;
 };
 
 // ======================WELCOME MESSAGE==============
 export type WelcomeMessage = {
-  id: string
-  value: string
-}
+  id: string;
+  value: string;
+};
 
 // ============== Users=================
 export type TelegramUser = {

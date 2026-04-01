@@ -41,11 +41,13 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     },
   });
 
+  const adminId = localStorage.getItem('id')
   const handleOnClickSend = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     if (message) {
       sendBroadcastMessageMutation.mutate({
         content: message,
         type: MessageType.TEXT,
+        sentByAdmin: adminId as string,
         conversationIds: selectedOption.map((item) => item.value),
       });
     }

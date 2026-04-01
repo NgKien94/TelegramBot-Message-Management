@@ -38,7 +38,7 @@ export type CreateMessageRequest = {
   content?: string;
   type?: MessageType;
   senderType: SenderType;
-  sentByAdmin: boolean;
+  sentByAdmin: string | null;
   conversationId: string;
 };
 
@@ -46,6 +46,7 @@ export type SendMessageBroadcastRequest = {
   fileUrls?: string[];
   content?: string;
   type?: MessageType;
+  sentByAdmin: string
   conversationIds: string[]
 };
 

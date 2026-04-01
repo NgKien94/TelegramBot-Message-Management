@@ -19,8 +19,9 @@ export class CreateMessageDto {
   @IsEnum(SenderType)
   senderType: SenderType;
 
-  @IsBoolean()
-  sentByAdmin: boolean;
+  @IsOptional()
+  @IsString()
+  sentByAdmin?: string;
 
   @IsString()
   @IsNotEmpty()
