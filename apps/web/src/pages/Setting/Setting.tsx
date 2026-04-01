@@ -25,11 +25,11 @@ export default function Setting() {
 
   const changeWelcomeMessageMutation = useMutation({
     mutationFn: updateWelcomeMessage,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Update welcome message successfully');
-      queryClient.invalidateQueries({
-        queryKey: ['welcome-message'],
-      });
+      queryClient.setQueryData(['welcome-message'],{
+        result: data.result
+      })
     },
     onError: () => {
       toast.error('Update welcome message failed');

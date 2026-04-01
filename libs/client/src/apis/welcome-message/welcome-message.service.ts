@@ -6,5 +6,5 @@ export const getWelcomeMessage = () => {
 }
 
 export const updateWelcomeMessage = (body: UpdateWelcomeMessageRequest) => {
-  return http.put('/welcome-message', body);
+  return http.put<unknown, ApiDataForClient<WelcomeMessage>>('/welcome-message', body);
 };
