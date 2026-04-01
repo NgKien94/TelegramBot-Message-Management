@@ -19,7 +19,10 @@ datasource db {
 model Account {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   email String @unique
+  name String
   password String
+
+  messages Message[]
 
   @@map("accounts")
 }
@@ -79,11 +82,12 @@ model Message {
   content String?
   type MessageType @default(TEXT)
   senderType SenderType
-  sentByAdmin Boolean
+  sentByAdmin String? @db.ObjectId
   conversationId String @db.ObjectId
   createdAt DateTime @default(now())
 
   // relation
+  account      Account?      @relation(fields: [sentByAdmin], references: [id])
   conversation Conversation @relation("ConversationMessages",fields: [conversationId],references: [id])
   lastMessageOf Conversation? @relation("ConversationLastMessage")
 

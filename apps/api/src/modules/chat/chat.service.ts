@@ -23,7 +23,7 @@ export class ChatService {
       content: '/start',
       type: MessageType.TEXT,
       senderType: SenderType.INCOMING,
-      sentByAdmin: false,
+      sentByAdmin: undefined,
       conversationId: conversation.id,
     });
 
@@ -32,7 +32,7 @@ export class ChatService {
       content: welcomeMessageFromBot,
       type: MessageType.TEXT,
       senderType: SenderType.OUTGOING,
-      sentByAdmin: false,
+      sentByAdmin: undefined,
       conversationId: conversation.id,
     });
 
@@ -53,7 +53,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: null,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -61,8 +61,8 @@ export class ChatService {
 
     // emit socket event for web frontend to realtime chat history
     this.socketGateway.socketHandleUpdateChatHistory([
-      { ...userMessage, createdAt: userMessage.createdAt.toISOString() },
-      { ...botMessage, createdAt: botMessage.createdAt.toISOString() },
+      { ...userMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
+      { ...botMessage, sentByAdmin: null, createdAt: botMessage.createdAt.toISOString() },
     ]);
   }
 
@@ -75,7 +75,7 @@ export class ChatService {
       content,
       type: MessageType.TEXT,
       senderType: SenderType.INCOMING,
-      sentByAdmin: false,
+      sentByAdmin: undefined,
       conversationId: conversation.id,
     });
 
@@ -97,7 +97,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: null,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -105,11 +105,11 @@ export class ChatService {
 
     // emit socket event for web frontend to realtime chat history
     this.socketGateway.socketHandleUpdateChatHistory([
-      { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
+      { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
     ]);
   }
 
-    async handleTelegramUserSendImages(userId: string,fileUrl: string[], content?: string) {
+  async handleTelegramUserSendImages(userId: string, fileUrl: string[], content?: string) {
     // get conversation by userId
     const conversation = await this.conversationService.getOrCreateConversation(userId);
 
@@ -119,7 +119,7 @@ export class ChatService {
       fileUrls: [...fileUrl],
       type: MessageType.FILE,
       senderType: SenderType.INCOMING,
-      sentByAdmin: false,
+      sentByAdmin: undefined,
       conversationId: conversation.id,
     });
 
@@ -141,7 +141,7 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: null,
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
@@ -149,10 +149,9 @@ export class ChatService {
 
     // emit socket event for web frontend to realtime chat history
     this.socketGateway.socketHandleUpdateChatHistory([
-      { ...newMessage, createdAt: newMessage.createdAt.toISOString() },
+      { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
     ]);
   }
-
 
   async handleSendMessageToTelegramUser(messageId: string) {
     const message = await this.messageService.getMessageDetail(messageId);
@@ -174,13 +173,25 @@ export class ChatService {
       isReadByAdmin: detailConversation.isReadByAdmin,
       lastMessage: {
         ...detailConversation.lastMessage,
-        sentByAdmin: detailConversation.lastMessage.sentByAdmin,
+        sentByAdmin: {
+          id: message.account.id,
+          name: message.account.name,
+        },
       },
       lastMessageAt: detailConversation.lastMessageAt.toISOString(),
       status: detailConversation.status,
     });
 
     // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([{ ...message, createdAt: message.createdAt.toISOString() }]);
+    this.socketGateway.socketHandleUpdateChatHistory([
+      {
+        ...message,
+        sentByAdmin: {
+          id: message.account.id,
+          name: message.account.name,
+        },
+        createdAt: message.createdAt.toISOString(),
+      },
+    ]);
   }
 }

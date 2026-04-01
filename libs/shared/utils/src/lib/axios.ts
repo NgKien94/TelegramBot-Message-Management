@@ -38,13 +38,17 @@ class Http {
     this.axiosInstance.interceptors.response.use(
       function onFullfilled(response) {
         if (response.config.url === 'auth/login' || response.config.url === 'auth/register') {
-          const { access_token, refresh_token } = response.data.data;
+          const { access_token, refresh_token,id } = response.data.data;
           if (access_token) {
             localStorage.setItem('access_token', access_token);
           }
 
           if (refresh_token) {
             localStorage.setItem('refresh_token', refresh_token);
+          }
+
+          if(id){
+            localStorage.setItem('id',id)
           }
 
           // redirect dashboard after login or register

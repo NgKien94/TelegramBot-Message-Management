@@ -8,6 +8,6 @@ export type JobTypeOfNewQueue = {
     content?: string;
     type?: MessageType;
     senderType: SenderType;
-    sentByAdmin: boolean;
+    sentByAdmin: string;
   };
 };

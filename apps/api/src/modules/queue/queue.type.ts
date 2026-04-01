@@ -7,6 +7,6 @@ export type SendMessageJobType = {
     content?: string;
     type?: MessageType;
     senderType: SenderType;
-    sentByAdmin: boolean;
+    sentByAdmin: string;
   };
 };

@@ -76,6 +76,7 @@ export class AuthService {
     });
 
     return {
+      id: account.id,
       access_token,
       refresh_token,
     };
@@ -97,6 +98,7 @@ export class AuthService {
     const account = await this.prismaService.account.create({
       data: {
         email: payload.email,
+        name: payload.name,
         password: hashedPassword,
       },
     });
@@ -124,6 +126,7 @@ export class AuthService {
     });
 
     return {
+      id: account.id,
       access_token,
       refresh_token,
     };

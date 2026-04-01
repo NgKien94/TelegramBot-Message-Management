@@ -104,12 +104,14 @@ export default function Editor() {
       return;
     }
 
+    const adminId = localStorage.getItem('id')
+
     createMessageMutation.mutate({
       conversationId: conversationId || '',
       senderType: SenderType.OUTGOING,
       fileUrls,
       content: sanitizedHtml,
-      sentByAdmin: true,
+      sentByAdmin: adminId,
     });
 
     editor.commands.clearContent();

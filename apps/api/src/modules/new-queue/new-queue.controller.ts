@@ -10,7 +10,7 @@ export class NewQueueController {
 
   @Post('messages')
   sendBroadcastMessage(@Body() body: CreateMessageOfNewQueueDto) {
-    const {conversationIds, ...rest} = body
+    const {conversationIds,...rest} = body
 
     this.queueService.addBulk( (conversationIds).map(item => {
       return {
@@ -19,7 +19,6 @@ export class NewQueueController {
         payload: {
           ...rest,
           senderType: SenderType.OUTGOING,
-          sentByAdmin: true
         }
       }
     }))

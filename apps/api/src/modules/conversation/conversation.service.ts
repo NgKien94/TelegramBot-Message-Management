@@ -22,12 +22,30 @@ export class ConversationService {
       },
       include: {
         telegramUser: true,
-        lastMessage: true,
+        lastMessage: {
+          include: {
+            account: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [{ lastMessageAt: 'desc' }, { updatedAt: 'desc' }],
     });
 
-    return conversations;
+    return conversations.map((conv) => ({
+      ...conv,
+      lastMessage: conv.lastMessage
+        ? {
+            ...conv.lastMessage,
+            sentByAdmin: conv.lastMessage.account,
+            account: undefined,
+          }
+        : null,
+    }));
   }
 
   async getDetailConversation(conversationId: string) {
@@ -37,11 +55,11 @@ export class ConversationService {
       },
       include: {
         telegramUser: true,
-        lastMessage: true
+        lastMessage: true,
       },
     });
 
-    return conversation
+    return conversation;
   }
 
   async getOrCreateConversation(userId: string) {
@@ -110,6 +128,14 @@ export class ConversationService {
       include: {
         telegramUser: true,
         messages: {
+          include: {
+            account: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: 'asc',
           },
@@ -117,6 +143,14 @@ export class ConversationService {
       },
     });
 
-    return result;
+
+    return {
+      ...result,
+      messages: result.messages.map((message) => ({
+        ...message,
+        sentByAdmin: message.account,
+        account: undefined,
+      })),
+    };
   }
 }

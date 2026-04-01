@@ -51,7 +51,7 @@ export class MessageService {
       throw signal.reason;
     }
 
-    if (message.senderType === 'OUTGOING' && message.sentByAdmin === true) {
+    if (message.senderType === 'OUTGOING' && message.sentByAdmin) {
       // emit event messageId, telegramId for telegram service to send message to Telegram user
       this.eventMitter.emit('message.outgoing.created', {
         messageId: message.id,
@@ -69,6 +69,14 @@ export class MessageService {
       where: {
         id: messageId,
       },
+      include: {
+        account: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      }
     });
 
     return message;
