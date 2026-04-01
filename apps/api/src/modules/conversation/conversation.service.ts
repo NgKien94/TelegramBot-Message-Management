@@ -128,6 +128,14 @@ export class ConversationService {
       include: {
         telegramUser: true,
         messages: {
+          include: {
+            account: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: 'asc',
           },
@@ -135,6 +143,14 @@ export class ConversationService {
       },
     });
 
-    return result;
+
+    return {
+      ...result,
+      messages: result.messages.map((message) => ({
+        ...message,
+        sentByAdmin: message.account,
+        account: undefined,
+      })),
+    };
   }
 }

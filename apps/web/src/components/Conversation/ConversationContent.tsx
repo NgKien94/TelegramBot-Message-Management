@@ -80,13 +80,17 @@ export default function ConversationContent() {
     };
   }, [queryClient, conversationId, updateConversationMutation]);
 
+  const telegramFullName = data
+    ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}`
+    : '';
+
   return (
     <div className="w-full h-screen flex flex-col">
       {(!conversationId || isError) && <EmptyConversation />}
       {isSuccess && (
         <>
           <UserCard user={data.result.telegramUser} />
-          <div ref={historyRef} className="conversation-history p-5 overflow-auto flex-1 flex flex-col gap-3">
+          <div ref={historyRef} className="conversation-history p-3 overflow-auto flex-1 flex flex-col gap-5">
             {data &&
               data.result.messages.map((message) => (
                 <MessageBubble
@@ -95,6 +99,8 @@ export default function ConversationContent() {
                   content={message.content}
                   sendTime={new Date(message.createdAt)}
                   fileUrls={message.fileUrls}
+                  sentByAdmin={message.sentByAdmin}
+                  telegramFullName={telegramFullName}
                 />
               ))}
           </div>
