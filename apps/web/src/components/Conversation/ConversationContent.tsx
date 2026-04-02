@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,27 @@ import {
 } from '@message-management/types';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import Editor from '../Editor/Editor';
+import { formatTimestamp } from '@message-management/utils';
+import DateDivider from './DateDivider';
 
+const groupMessagesByDate = (messages: Messages[]) => {
+  const groups: { [key: string]: { date: string; messages: Messages[] } } = {};
+
+  messages.forEach((message) => {
+    const dateKey = formatTimestamp(message.createdAt);
+
+    if (!groups[dateKey]) {
+      groups[dateKey] = {
+        date: dateKey,
+        messages: [],
+      };
+    }
+
+    groups[dateKey].messages.push(message);
+  });
+
+  return Object.values(groups);
+};
 
 export default function ConversationContent() {
   const conversationId = useContext(ConversationIdContext);
@@ -54,10 +74,13 @@ export default function ConversationContent() {
           const newMessagesForCurrentConversation = payload.newMessages.filter(
             (item) => item.conversationId === conversationId,
           );
-          const replaceMessages = oldData.result.messages.push(...newMessagesForCurrentConversation);
+
           return {
             ...oldData,
-            messages: replaceMessages,
+            result: {
+              ...oldData.result,
+              messages: [...oldData.result.messages, ...newMessagesForCurrentConversation],
+            },
           };
         },
       );
@@ -80,9 +103,11 @@ export default function ConversationContent() {
     };
   }, [queryClient, conversationId, updateConversationMutation]);
 
-  const telegramFullName = data
-    ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}`
-    : '';
+  const telegramFullName = data ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}` : '';
+
+  const listMessages = useMemo(() => {
+    return data ? groupMessagesByDate(data.result.messages) : [];
+  }, [data]);
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -91,22 +116,27 @@ export default function ConversationContent() {
         <>
           <UserCard user={data.result.telegramUser} />
           <div ref={historyRef} className="conversation-history p-3 overflow-auto flex-1 flex flex-col gap-5">
-            {data &&
-              data.result.messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  senderType={message.senderType}
-                  content={message.content}
-                  sendTime={new Date(message.createdAt)}
-                  fileUrls={message.fileUrls}
-                  sentByAdmin={message.sentByAdmin}
-                  telegramFullName={telegramFullName}
-                />
+            {listMessages &&
+              listMessages.map((item) => (
+                <div className="flex flex-col gap-3">
+                  <DateDivider label={item.date} />
+                  {item.messages.map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      senderType={message.senderType}
+                      content={message.content}
+                      sendTime={new Date(message.createdAt)}
+                      fileUrls={message.fileUrls}
+                      sentByAdmin={message.sentByAdmin}
+                      telegramFullName={telegramFullName}
+                    />
+                  ))}
+                </div>
               ))}
           </div>
 
           <div className="conversation-action w-full mb-2 flex justify-center">
-            <Editor key={conversationId}/>
+            <Editor key={conversationId} />
           </div>
         </>
       )}

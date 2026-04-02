@@ -42,3 +42,25 @@ export const toBase64FromBlob = (blob: Blob): Promise<string> =>
     reader.onload = () => resolve(reader.result as string);
     reader.readAsDataURL(blob);
   });
+
+ export const formatTimestamp = (timestamp: string | number): string => {
+  const date = new Date(timestamp);
+  const today = new Date();
+
+  const toDateOnly = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  const dateOnly = toDateOnly(date);
+  const todayOnly = toDateOnly(today);
+
+  const diffMs = todayOnly.getTime() - dateOnly.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+
+  return `${dd}/${mm}/${yyyy}`;
+}

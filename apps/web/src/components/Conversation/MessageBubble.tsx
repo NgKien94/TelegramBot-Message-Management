@@ -4,6 +4,7 @@ import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Avatar from 'react-avatar';
 import { Messages } from '@message-management/types';
+import { formatTimestamp } from '@message-management/utils';
 
 interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   telegramFullName: string;
@@ -38,11 +39,13 @@ export default function MessageBubble({
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const slides = fileUrls.map((url) => ({ src: url }));
 
+  // console.log("Format Date: ",formatTimestamp(sendTime.toDateString()));
+
   const timestamp = (
     <span
       className={clsx(
         'text-[0.625rem] leading-none whitespace-nowrap self-end ml-1.5 mb-[-2px]',
-        isIncoming ? 'text-slate-400' : 'text-white/60',
+        isIncoming ? 'text-slate-400' : 'text-white/70',
       )}
     >
       {sendTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
