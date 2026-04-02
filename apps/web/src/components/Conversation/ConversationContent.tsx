@@ -65,6 +65,8 @@ export default function ConversationContent() {
   useEffect(() => {
     // console.log(queryClient.getQueryData(['chat-history', conversationId]));
     const conversationContentHandler = (payload: { newMessages: Messages[] }) => {
+      const hasMessageForCurrentConversation = payload.newMessages.filter((item) => item.conversationId === conversationId);
+
       queryClient.setQueryData(
         ['chat-history', conversationId],
         (oldData: ApiDataForClient<ChatHistoryOfConversation>) => {
@@ -85,8 +87,7 @@ export default function ConversationContent() {
         },
       );
 
-      // mark current conversation is read
-      if (conversationId) {
+      if (hasMessageForCurrentConversation.length > 0 && !hasMessageForCurrentConversation.at(-1)?.sentByAdmin) {
         updateConversationMutation.mutate({
           conversationId: conversationId as string,
           body: {
@@ -103,7 +104,6 @@ export default function ConversationContent() {
     };
   }, [queryClient, conversationId, updateConversationMutation]);
 
-  // const telegramFullName = data ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}` : '';
 
   const listMessages = useMemo(() => {
     return data ? groupMessagesByDate(data.result.messages) : [];
