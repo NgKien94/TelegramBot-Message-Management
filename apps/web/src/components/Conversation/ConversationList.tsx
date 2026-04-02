@@ -22,16 +22,28 @@ export default function ConversationList({ filterCriteria, ...rest }: Conversati
   const updateConversationMutation = useMutation({
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
       updateConversation(conversationId, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['conversation-list'],
+    onSuccess: (_, variables) => {
+
+      queryClient.setQueryData(['conversation-list', filterCriteria], (oldData: ApiDataForClient<Conversation[]>) => {
+        if (!oldData) return oldData;
+        return {
+          result: oldData.result.map((conversation) => {
+            if (conversation.id === variables.conversationId) {
+              return {
+                ...conversation,
+                isReadByAdmin: variables.body.isReadByAdmin,
+              };
+            }
+            return conversation;
+          }),
+        };
       });
-      // console.log(queryClient.getQueryCache());
     },
     onError: (error) => {
       console.log('Error when mutation conversation list', error);
     },
   });
+
 
   useEffect(() => {
     const handlerConversationList = (payload: { conversation: Conversation }) => {
