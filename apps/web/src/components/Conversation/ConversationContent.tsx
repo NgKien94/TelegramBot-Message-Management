@@ -103,7 +103,7 @@ export default function ConversationContent() {
     };
   }, [queryClient, conversationId, updateConversationMutation]);
 
-  const telegramFullName = data ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}` : '';
+  // const telegramFullName = data ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}` : '';
 
   const listMessages = useMemo(() => {
     return data ? groupMessagesByDate(data.result.messages) : [];
@@ -128,7 +128,7 @@ export default function ConversationContent() {
                       sendTime={new Date(message.createdAt)}
                       fileUrls={message.fileUrls}
                       sentByAdmin={message.sentByAdmin}
-                      telegramFullName={telegramFullName}
+                      telegramUser={data.result.telegramUser}
                     />
                   ))}
                 </div>

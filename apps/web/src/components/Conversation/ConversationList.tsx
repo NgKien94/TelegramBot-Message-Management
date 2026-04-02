@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ConversationItem from './ConversationItem';
 import { getConversationsList, socket, updateConversation } from '@message-management/client';
-import {  useEffect } from 'react';
+import { useEffect } from 'react';
 
 import {
   ApiDataForClient,
@@ -15,8 +15,8 @@ interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   filterCriteria: GetConversationRequest;
 }
 
-export default function ConversationList({  filterCriteria, ...rest }: ConversationListProps) {
-  const navigate = useNavigate()
+export default function ConversationList({ filterCriteria, ...rest }: ConversationListProps) {
+  const navigate = useNavigate();
 
   const queryClient = useQueryClient();
   const updateConversationMutation = useMutation({
@@ -26,6 +26,7 @@ export default function ConversationList({  filterCriteria, ...rest }: Conversat
       queryClient.invalidateQueries({
         queryKey: ['conversation-list'],
       });
+      // console.log(queryClient.getQueryCache());
     },
     onError: (error) => {
       console.log('Error when mutation conversation list', error);
@@ -68,14 +69,16 @@ export default function ConversationList({  filterCriteria, ...rest }: Conversat
     queryFn: () => getConversationsList(filterCriteria),
   });
 
-  const handleOnClickConversationItem = (conversationId: string) => () => {
-    navigate(`/conversations/${conversationId}`)
-    updateConversationMutation.mutate({
-      conversationId: conversationId as string,
-      body: {
-        isReadByAdmin: true,
-      },
-    });
+  const handleOnClickConversationItem = (conversation: Conversation) => () => {
+    navigate(`/conversations/${conversation.id}`);
+    if (!conversation.isReadByAdmin) {
+      updateConversationMutation.mutate({
+        conversationId: conversation.id,
+        body: {
+          isReadByAdmin: true,
+        },
+      });
+    }
   };
 
   return (
@@ -84,7 +87,7 @@ export default function ConversationList({  filterCriteria, ...rest }: Conversat
         data.result.map((conversation) => (
           <ConversationItem
             conversation={conversation}
-            onClick={handleOnClickConversationItem(conversation.id)}
+            onClick={handleOnClickConversationItem(conversation)}
             key={conversation.id}
           />
         ))}

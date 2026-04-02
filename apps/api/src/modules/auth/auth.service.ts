@@ -29,6 +29,9 @@ export class AuthService {
     const user = await this.prismaService.account.findUnique({
       where: {
         id: accountId
+      },
+      omit: {
+        password: true
       }
     })
 
