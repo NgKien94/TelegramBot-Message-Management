@@ -1,21 +1,29 @@
-import { MessageType } from "@message-management/types"
-import { IsArray, IsEnum, IsOptional, IsString } from "class-validator"
+import { MessageType, SenderType } from '@message-management/types';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateMessageOfQueueDto {
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  fileUrls?: string[];
 
   @IsOptional()
   @IsString()
-  fileUrl ?: string
-
-  @IsOptional()
-  @IsString()
-  content ?: string
+  content?: string;
 
   @IsOptional()
   @IsEnum(MessageType)
-  type ?: MessageType
+  type?: MessageType;
+
+  @IsNotEmpty()
+  @IsEnum(SenderType)
+  senderType: SenderType;
+
+  @IsString()
+  @IsNotEmpty()
+  sentByAdmin: string;
 
   @IsArray()
-  @IsString({each: true})
-  conversationIds: string[]
+  @IsString({ each: true })
+  conversationIds: string[];
 }

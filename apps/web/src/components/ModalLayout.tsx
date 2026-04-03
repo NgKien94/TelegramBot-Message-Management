@@ -135,31 +135,41 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
             className="text-sm"
           />
 
-          <div className="overflow-y-auto text-sm flex-1 border border-gray-300 rounded-md">
-            <EditorContent
-              placeholder="Write something ..."
-              editor={editor}
-              className=" [&_.ProseMirror]:outline-none [&_.ProseMirror]:p-2"
-            />
-          </div>
-          {editor && (
-            <div className="flex justify-start items-center px-2 pb-1">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded hover:bg-gray-100 text-gray-500 hover:text-blue-500 transition-colors"
-                title="Chèn ảnh"
-              >
-                <LuImagePlus size={16} />
-              </button>
-              <span className={`text-xs ${charCounter >= MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
-                {charCounter}/{MAX_LENGTH}
-              </span>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+          <div className="flex flex-col text-sm flex-1 border border-gray-300 rounded-md overflow-hidden">
 
-              <ToolBar editor={editor} />
+            <div className="overflow-y-auto flex-1">
+              <EditorContent
+                placeholder="Write something ..."
+                editor={editor}
+                className="[&_.ProseMirror]:outline-none [&_.ProseMirror]:p-2"
+              />
             </div>
-          )}
+
+            {editor && (
+              <div className="flex justify-start items-center px-2 py-1 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2 rounded hover:bg-gray-100 text-gray-500 hover:text-blue-500 transition-colors"
+                  title="Chèn ảnh"
+                >
+                  <LuImagePlus size={16} />
+                </button>
+                <span className={`text-xs ${charCounter >= MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
+                  {charCounter}/{MAX_LENGTH}
+                </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+                <ToolBar editor={editor} />
+              </div>
+            )}
+
+          </div>
 
           <Flex gap="3">
             <Button
