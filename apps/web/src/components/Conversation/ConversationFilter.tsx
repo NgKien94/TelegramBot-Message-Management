@@ -15,7 +15,7 @@ export default function ConversationFilter({ onApplyFilter, filter }: Conversati
 
   const tabClasses = (type: string) => {
     return isActive === type
-      ? " text-[var(--primary-color)] relative after:content-[''] after:w-1/3 after:h-0.5 after:absolute after:-bottom-3 after:left-0 after:translate-x-full after:bg-black "
+      ? " text-[var(--primary-color)] relative after:content-[''] after:w-1/3 after:h-0.5 after:absolute after:-bottom-3 after:left-0 after:translate-x-full after:bg-black opacity-80"
       : '';
   };
 
