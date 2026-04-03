@@ -5,3 +5,4 @@ export * from './lib/Modal';
 export * from './lib/Error';
 export * from './lib/Empty';
 export * from './lib/NotFound';
+export * from './lib/Loading';

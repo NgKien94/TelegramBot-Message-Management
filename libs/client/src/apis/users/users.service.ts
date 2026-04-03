@@ -11,6 +11,7 @@ export const getUsers = () => {
       lastName: string,
       conversation: {
         id: string
+        isReadByAdmin: boolean
       }
     }[]>
   >('users');

@@ -1,8 +1,10 @@
 import { EyeOpenIcon, PersonIcon } from '@radix-ui/react-icons';
-import { useQuery } from '@tanstack/react-query';
-import { getUsers } from '@message-management/client';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getUsers, updateConversation } from '@message-management/client';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@radix-ui/themes';
+import { Loading } from '@message-management/shared/ui';
+import {  UpdateConversationRequest } from '@message-management/types';
 
 export default function Users() {
   const navigate = useNavigate();
@@ -12,6 +14,21 @@ export default function Users() {
     queryFn: () => getUsers(),
   });
 
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) => updateConversation(conversationId, body)
+  })
+
+  const handleViewConversation = (conversation: {id: string, isReadByAdmin: boolean}) => {
+    if (!conversation.isReadByAdmin) {
+      updateConversationMutation.mutate({
+        conversationId: conversation.id,
+        body: {
+          isReadByAdmin: true,
+        },
+      });
+    }
+    navigate(`/conversations/${conversation.id}`);
+  };
 
   return (
     <div className="min-h-screen p-6 md:p-10">
@@ -21,16 +38,14 @@ export default function Users() {
           Management
         </p>
         <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-        {isSuccess && (
-          <p className="text-sm text-gray-400">{data.result.length} users total</p>
-        )}
+        {isSuccess && <p className="text-sm text-gray-400">{data.result.length} users total</p>}
       </div>
 
       {/* Table card */}
       <div className="overflow-hidden  rounded-2xl border border-gray-200 bg-white shadow-sm">
         {isLoading && (
           <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-            Loading...
+            <Loading />
           </div>
         )}
 
@@ -47,10 +62,7 @@ export default function Users() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {data.result.map((item, i) => (
-                <tr
-                  key={item.telegramID}
-                  className="group transition-colors hover:bg-[var(--primary-color)]/5"
-                >
+                <tr key={item.telegramID} className="group transition-colors hover:bg-[var(--primary-color)]/5">
                   {/* Avatar + ID */}
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
@@ -60,7 +72,7 @@ export default function Users() {
                       <span className="font-mono text-gray-700">{item.telegramID}</span>
                     </div>
                   </td>
-                    {/* Username */}
+                  {/* Username */}
                   <td className="px-5 py-3.5">
                     {item.username ? (
                       <span className="font-medium text-gray-800">@{item.username}</span>
@@ -68,22 +80,18 @@ export default function Users() {
                       <Badge color="red">Not registered</Badge>
                     )}
                   </td>
-                    {/* Firstname */}
+                  {/* Firstname */}
                   <td className="px-5 py-3.5 text-gray-700">
-                    {item.firstName ?? (
-                      <span className="text-gray-300 italic">—</span>
-                    )}
+                    {item.firstName ?? <span className="text-gray-300 italic">—</span>}
                   </td>
-                    {/* Last name */}
+                  {/* Last name */}
                   <td className="px-5 py-3.5 text-gray-700">
-                    {item.lastName ?? (
-                      <span className="text-gray-300 italic">—</span>
-                    )}
+                    {item.lastName ?? <span className="text-gray-300 italic">—</span>}
                   </td>
 
                   <td className="px-5 py-3.5 text-right">
                     <button
-                      onClick={() => navigate(`/conversations/${item.conversation.id}`)}
+                      onClick={() => handleViewConversation(item.conversation)}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--primary-color)]/30 bg-[var(--primary-color)]/5 px-3 py-1.5 text-xs font-semibold text-[var(--primary-color)] transition hover:bg-[var(--primary-color)] hover:text-white"
                     >
                       <EyeOpenIcon className="w-3.5 h-3.5" />

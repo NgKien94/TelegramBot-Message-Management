@@ -79,8 +79,8 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
         <div className="card-header flex justify-between items-center">
           <p
             className={clsx(
-              'text-sm ',
-              conversation.isReadByAdmin ? ' font-semibold' : ' text-[var(--primary-color)] font-bold',
+              'text-sm',
+              conversation.isReadByAdmin ? ' font-semibold text-gray-800' : ' text-[var(--primary-color)] font-bold',
             )}
           >
             {conversation.telegramUser.username || conversation.telegramUser.telegramID}
@@ -93,12 +93,14 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
           </p>
         </div>
         <div className="card-content flex justify-between items-center">
-          <p className="max-w-48 line-clamp-1 text-sm text-gray-500">
-            {getSenderLabel(conversation.lastMessage, conversation.telegramUser)}
-            {Boolean(conversation.lastMessage.content) === false
-              ? 'Sent photo'
-              : removeAllHTMLTagToText(conversation.lastMessage.content)}
-          </p>
+          <div className="w-full line-clamp-1 text-sm text-gray-500">
+            <span className='inline-block text-gray-500 font-medium'>{getSenderLabel(conversation.lastMessage, conversation.telegramUser)}</span>
+            <span className='inline-block ml-1'>
+              {Boolean(conversation.lastMessage.content) === false
+                ? 'Sent photo'
+                : removeAllHTMLTagToText(conversation.lastMessage.content)}
+            </span>
+          </div>
           <div className="flex gap-2 text-xl justify-center items-center group">
             {conversation.status === 'OPEN' ? (
               <BiArchiveOut
