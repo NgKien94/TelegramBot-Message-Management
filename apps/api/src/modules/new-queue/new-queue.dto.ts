@@ -4,8 +4,9 @@ import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validat
 export class CreateMessageOfNewQueueDto {
 
   @IsOptional()
-  @IsString()
-  fileUrl ?: string
+  @IsArray()
+  @IsString({ each: true })
+  fileUrls?: string[];
 
   @IsOptional()
   @IsString()

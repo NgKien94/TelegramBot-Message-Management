@@ -4,7 +4,7 @@ export type JobTypeOfNewQueue = {
   jobName: string;
   conversationId: string;
   payload: {
-    fileUrl?: string;
+    fileUrl?: string[];
     content?: string;
     type?: MessageType;
     senderType: SenderType;

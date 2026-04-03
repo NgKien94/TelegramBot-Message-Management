@@ -8,19 +8,6 @@ import {
   IsString,
 } from 'class-validator';
 
-// export class CreateConversationDto {
-//   @IsString()
-//   @IsNotEmpty()
-//   userId: string;
-
-//   @IsOptional()
-//   @IsEnum(ConversationStatus)
-//   status: ConversationStatus;
-
-//   @IsBoolean()
-//   isReadByAdmin: boolean;
-// }
-
 export class GetConversationDto {
   @IsOptional()
   @IsString()
