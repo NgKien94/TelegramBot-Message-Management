@@ -1,15 +1,17 @@
-import { Dispatch, MouseEvent, SetStateAction, useState } from 'react';
+import { Dispatch, MouseEvent, SetStateAction, useRef, useState } from 'react';
 import { Modal } from '@message-management/shared/ui';
-import { Button, Flex, TextArea } from '@radix-ui/themes';
+import { Button, Flex } from '@radix-ui/themes';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getUsers, sendBroadcastMessage } from '@message-management/client';
+import { getUsers, sendBroadcastMessage, uploadImage } from '@message-management/client';
 import { toast } from 'react-toastify';
-import { MessageType } from '@message-management/types';
 import Select from 'react-select';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ToolBar from './Editor/ToolBar';
 import { sanitizeToTelegramHtml } from '@message-management/utils';
+import { LuImagePlus } from 'react-icons/lu';
+import Image from '@tiptap/extension-image';
+import CharacterCount from '@tiptap/extension-character-count';
 
 interface ModalLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpenModal: boolean;
@@ -17,9 +19,13 @@ interface ModalLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 type OptionType = { value: string; label: string };
+const MAX_LENGTH = 1024;
 
 export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayoutProps) {
   const [selectedOption, setSelectedOption] = useState<OptionType[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [charCounter, setCharCounter] = useState<number>(0);
+  const adminId = localStorage.getItem('id');
 
   const { data } = useQuery({
     queryKey: ['users'],
@@ -35,6 +41,19 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
       };
     }) ?? [];
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file || !editor) {
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file); // create a link : blob:http://.... => binary data of file in RAM Browser
+    editor.chain().focus().setImage({ src: objectUrl }).run();
+
+    e.target.value = '';
+  };
+
   const sendBroadcastMessageMutation = useMutation({
     mutationFn: sendBroadcastMessage,
     onSuccess: () => {
@@ -45,26 +64,62 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     },
   });
 
-  const adminId = localStorage.getItem('id');
-  const handleOnClickSend = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    const textContent  = editor.getText()
-    const htmlContent = editor.getHTML()
+  const handleOnClickSend = async (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    const text = editor.getText().trim();
+    const rawHtml = editor.getHTML();
 
-    if (textContent) {
-      const sanitizedHtml = sanitizeToTelegramHtml(htmlContent);
+    const divElement = document.createElement('div');
+    divElement.innerHTML = rawHtml;
+    const imgElements = divElement.querySelectorAll('img');
+
+    const fileUrls = await Promise.all(
+      Array.from(imgElements).map(async (img) => {
+        // fetch object URL
+        const response = await fetch(img.src);
+
+        // get raw binary data
+        const blob = await response.blob();
+        const data = await uploadImage(blob);
+
+        return data.result.url;
+      }),
+    );
+
+    const sanitizedHtml = sanitizeToTelegramHtml(editor.getHTML());
+
+    if (!text && imgElements.length === 0) {
+      return;
+    }
+
+    if (text) {
       sendBroadcastMessageMutation.mutate({
+        fileUrls,
         content: sanitizedHtml,
-        type: MessageType.TEXT,
         sentByAdmin: adminId as string,
         conversationIds: selectedOption.map((item) => item.value),
       });
     }
-    editor.commands.clearContent()
+
+    editor.commands.clearContent();
     setIsOpenModal(false);
   };
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'w-12 h-12 mr-1 align-bottom object-cover rounded-lg inline-block',
+        },
+      }),
+      CharacterCount.configure({
+        limit: MAX_LENGTH,
+      }),
+    ],
+    onUpdate({ editor }) {
+      setCharCounter(editor.storage.characterCount.characters());
+    },
   });
 
   return (
@@ -87,7 +142,25 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
               className=" [&_.ProseMirror]:outline-none [&_.ProseMirror]:p-2"
             />
           </div>
-          <ToolBar editor={editor} />
+          {editor && (
+            <div className="flex justify-start items-center px-2 pb-1">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 rounded hover:bg-gray-100 text-gray-500 hover:text-blue-500 transition-colors"
+                title="Chèn ảnh"
+              >
+                <LuImagePlus size={16} />
+              </button>
+              <span className={`text-xs ${charCounter >= MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
+                {charCounter}/{MAX_LENGTH}
+              </span>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+
+              <ToolBar editor={editor} />
+            </div>
+          )}
+
           <Flex gap="3">
             <Button
               radius="medium"
