@@ -10,6 +10,7 @@ import {
   UpdateConversationRequest,
 } from '@message-management/types';
 import { useNavigate } from 'react-router-dom';
+import { Loading } from '@message-management/shared/ui';
 
 interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   filterCriteria: GetConversationRequest;
@@ -23,7 +24,6 @@ export default function ConversationList({ filterCriteria, ...rest }: Conversati
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
       updateConversation(conversationId, body),
     onSuccess: (_, variables) => {
-
       queryClient.setQueryData(['conversation-list', filterCriteria], (oldData: ApiDataForClient<Conversation[]>) => {
         if (!oldData) return oldData;
         return {
@@ -43,7 +43,6 @@ export default function ConversationList({ filterCriteria, ...rest }: Conversati
       console.log('Error when mutation conversation list', error);
     },
   });
-
 
   useEffect(() => {
     const handlerConversationList = (payload: { conversation: Conversation }) => {
@@ -76,7 +75,7 @@ export default function ConversationList({ filterCriteria, ...rest }: Conversati
     };
   }, [queryClient]);
 
-  const { isSuccess, data } = useQuery({
+  const { isSuccess, isLoading, data } = useQuery({
     queryKey: ['conversation-list', filterCriteria],
     queryFn: () => getConversationsList(filterCriteria),
   });
@@ -94,7 +93,8 @@ export default function ConversationList({ filterCriteria, ...rest }: Conversati
   };
 
   return (
-    <div {...rest} className="px-3 w-96 h-screen flex flex-col space-y-2">
+    <div {...rest} className="px-3 h-screen flex flex-col space-y-2">
+      {isLoading && <Loading />}
       {isSuccess &&
         data.result.map((conversation) => (
           <ConversationItem
