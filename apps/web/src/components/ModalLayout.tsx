@@ -6,6 +6,10 @@ import { getUsers, sendBroadcastMessage } from '@message-management/client';
 import { toast } from 'react-toastify';
 import { MessageType } from '@message-management/types';
 import Select from 'react-select';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import ToolBar from './Editor/ToolBar';
+import { sanitizeToTelegramHtml } from '@message-management/utils';
 
 interface ModalLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpenModal: boolean;
@@ -15,7 +19,6 @@ interface ModalLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
 type OptionType = { value: string; label: string };
 
 export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayoutProps) {
-  const [message, setMessage] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<OptionType[]>([]);
 
   const { data } = useQuery({
@@ -24,12 +27,13 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     enabled: isOpenModal,
   });
 
-  const options: OptionType[] = data?.result.map((item) => {
-    return {
+  const options: OptionType[] =
+    data?.result.map((item) => {
+      return {
         value: item.conversation.id,
         label: `${item.firstName} ${item.lastName}`,
       };
-  }) ?? [];
+    }) ?? [];
 
   const sendBroadcastMessageMutation = useMutation({
     mutationFn: sendBroadcastMessage,
@@ -41,19 +45,27 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     },
   });
 
-  const adminId = localStorage.getItem('id')
+  const adminId = localStorage.getItem('id');
   const handleOnClickSend = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    if (message) {
+    const textContent  = editor.getText()
+    const htmlContent = editor.getHTML()
+
+    if (textContent) {
+      const sanitizedHtml = sanitizeToTelegramHtml(htmlContent);
       sendBroadcastMessageMutation.mutate({
-        content: message,
+        content: sanitizedHtml,
         type: MessageType.TEXT,
         sentByAdmin: adminId as string,
         conversationIds: selectedOption.map((item) => item.value),
       });
     }
-    setMessage('');
+    editor.commands.clearContent()
     setIsOpenModal(false);
   };
+
+  const editor = useEditor({
+    extensions: [StarterKit],
+  });
 
   return (
     <div>
@@ -67,13 +79,15 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
             options={options}
             className="text-sm"
           />
-          <TextArea
-            placeholder="Type here …"
-            radius="full"
-            className="flex-1"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
+
+          <div className="overflow-y-auto text-sm flex-1 border border-gray-300 rounded-md">
+            <EditorContent
+              placeholder="Write something ..."
+              editor={editor}
+              className=" [&_.ProseMirror]:outline-none [&_.ProseMirror]:p-2"
+            />
+          </div>
+          <ToolBar editor={editor} />
           <Flex gap="3">
             <Button
               radius="medium"
