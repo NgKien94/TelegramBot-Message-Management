@@ -18,7 +18,7 @@ export default function Conversations() {
 
   return (
     <div className="flex">
-      <div className="basis-7/12 shadow-lg">
+      <div className="basis-7/12 min-w-64 shadow-lg">
         <ConversationFilter onApplyFilter={setFilter} filter={filter} />
         <ConversationList  filterCriteria={filter}/>
       </div>
