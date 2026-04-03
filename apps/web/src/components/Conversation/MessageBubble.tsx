@@ -3,11 +3,10 @@ import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Avatar from 'react-avatar';
-import { Messages } from '@message-management/types';
-import { formatTimestamp } from '@message-management/utils';
+import { Messages, TelegramUser } from '@message-management/types';
 
 interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
-  telegramFullName: string;
+  telegramUser?: TelegramUser;
   senderType: string;
   content?: string;
   sendTime: Date;
@@ -18,11 +17,11 @@ interface MessageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   };
 }
 
-const getNameForAvatar = (
-  telegramFullName: string,
+const createAvatar = (
+  telegramUser: TelegramUser | undefined,
   message: Pick<Messages, 'sentByAdmin' | 'senderType'>,
 ) => {
-  if (message.senderType === 'INCOMING') return telegramFullName;
+  if (message.senderType === 'INCOMING') return `${telegramUser?.firstName} ${telegramUser?.lastName}`;
   if (!message.sentByAdmin) return 'Bot';
   return `Admin ${message.sentByAdmin.name}`;
 };
@@ -33,13 +32,11 @@ export default function MessageBubble({
   sendTime,
   fileUrls,
   sentByAdmin,
-  telegramFullName,
+  telegramUser,
 }: MessageBubbleProps) {
   const isIncoming = senderType === 'INCOMING';
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const slides = fileUrls.map((url) => ({ src: url }));
-
-  // console.log("Format Date: ",formatTimestamp(sendTime.toDateString()));
 
   const timestamp = (
     <span
@@ -57,19 +54,17 @@ export default function MessageBubble({
       {/* Bubble */}
       <div className="flex justify-center items-end gap-x-1">
         <div className={clsx(isIncoming ? 'order-first' : 'order-last')}>
-          <Avatar
-            name={getNameForAvatar(telegramFullName, { senderType, sentByAdmin })}
-            round={true}
-            size="30"
-          />
+          {/* Avatar */}
+          {(isIncoming && telegramUser?.avatarUrl) && <Avatar src={telegramUser.avatarUrl} round={true} size="30" />}
+          {(!isIncoming || Boolean(telegramUser?.avatarUrl) === false) && (
+            <Avatar name={createAvatar(telegramUser, { senderType, sentByAdmin })} round={true} size="30" />
+          )}
         </div>
 
         <div
           className={clsx(
             'flex flex-col gap-2 max-w-sm p-2 rounded-2xl',
-            isIncoming
-              ? 'bg-slate-200 text-black rounded-bl-sm'
-              : 'bg-[var(--primary-color)] text-white rounded-br-sm',
+            isIncoming ? 'bg-slate-200 text-black rounded-bl-sm' : 'bg-[var(--primary-color)] text-white rounded-br-sm',
           )}
         >
           {/* Images */}

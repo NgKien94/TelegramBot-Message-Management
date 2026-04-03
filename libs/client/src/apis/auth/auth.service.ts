@@ -19,6 +19,7 @@ export const getMe = () => {
     ApiDataForClient<{
       id: string;
       email: string;
+      name: string
     }>
   >('auth/me');
 };

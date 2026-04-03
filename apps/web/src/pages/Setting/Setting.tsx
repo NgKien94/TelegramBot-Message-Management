@@ -75,16 +75,20 @@ export default function Setting() {
   };
 
   return (
-    <div className="flex justify-center py-10">
+    <div className="flex justify-center py-3">
       <div className="w-full max-w-2xl space-y-4 text-sm text-gray-600">
         {/* Account */}
         <section>
           <h2 className="mb-2 text-base font-semibold text-gray-800">Account</h2>
 
           <div className="rounded-lg border bg-white">
-            <div className="flex justify-between p-4 border-b">
+            <div className="flex justify-between p-3 border-b">
               <span>Email</span>
               <span className="font-medium text-gray-900">{isSuccess ? data.result.email : 'Unknown'}</span>
+            </div>
+            <div className="flex justify-between p-3 border-b">
+              <span>Name</span>
+              <span className="font-medium text-gray-900">{isSuccess ? data.result.name : 'Unknown'}</span>
             </div>
           </div>
         </section>

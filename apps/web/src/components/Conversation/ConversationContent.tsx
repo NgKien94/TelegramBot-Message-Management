@@ -8,6 +8,8 @@ import EmptyConversation from './EmptyConversation';
 import {
   ApiDataForClient,
   ChatHistoryOfConversation,
+  Conversation,
+  GetConversationRequest,
   Messages,
   UpdateConversationRequest,
 } from '@message-management/types';
@@ -48,9 +50,29 @@ export default function ConversationContent() {
   const updateConversationMutation = useMutation({
     mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
       updateConversation(conversationId, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['conversation-list'],
+    onSuccess: (_, variables) => {
+
+      const queries = queryClient.getQueryCache().findAll({ queryKey: ['conversation-list'] });
+
+      queries.forEach((query) => {
+        const status = (query.queryKey[1] as GetConversationRequest).status;
+
+        queryClient.setQueryData(query.queryKey, (oldData: ApiDataForClient<Conversation[]>) => {
+          if (!oldData) return oldData;
+
+          const filteredList = oldData.result.filter((c) => c.id !== variables.conversationId);
+          const currentConversation = oldData.result.find((c) => c.id === variables.conversationId);
+
+          if (currentConversation && status === 'OPEN') {
+            return {
+              result: [{ ...currentConversation, isReadByAdmin: variables.body.isReadByAdmin, status: 'OPEN' }, ...filteredList],
+            };
+          }
+
+          return {
+            result: filteredList,
+          };
+        });
       });
     },
   });
@@ -65,6 +87,10 @@ export default function ConversationContent() {
   useEffect(() => {
     // console.log(queryClient.getQueryData(['chat-history', conversationId]));
     const conversationContentHandler = (payload: { newMessages: Messages[] }) => {
+      const hasMessageForCurrentConversation = payload.newMessages.filter(
+        (item) => item.conversationId === conversationId,
+      );
+
       queryClient.setQueryData(
         ['chat-history', conversationId],
         (oldData: ApiDataForClient<ChatHistoryOfConversation>) => {
@@ -85,8 +111,7 @@ export default function ConversationContent() {
         },
       );
 
-      // mark current conversation is read
-      if (conversationId) {
+      if (hasMessageForCurrentConversation.length > 0 && !hasMessageForCurrentConversation.at(-1)?.sentByAdmin) {
         updateConversationMutation.mutate({
           conversationId: conversationId as string,
           body: {
@@ -102,8 +127,6 @@ export default function ConversationContent() {
       socket.off('new_messages', conversationContentHandler);
     };
   }, [queryClient, conversationId, updateConversationMutation]);
-
-  const telegramFullName = data ? `${data.result.telegramUser.firstName} ${data.result.telegramUser.lastName}` : '';
 
   const listMessages = useMemo(() => {
     return data ? groupMessagesByDate(data.result.messages) : [];
@@ -128,7 +151,7 @@ export default function ConversationContent() {
                       sendTime={new Date(message.createdAt)}
                       fileUrls={message.fileUrls}
                       sentByAdmin={message.sentByAdmin}
-                      telegramFullName={telegramFullName}
+                      telegramUser={data.result.telegramUser}
                     />
                   ))}
                 </div>

@@ -9,5 +9,6 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/.nx": true
-  }
+  },
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
 }
