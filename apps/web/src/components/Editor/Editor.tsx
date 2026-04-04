@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import ToolBar from './ToolBar';
 import { useContext, useRef, useState } from 'react';
 import { ConversationIdContext } from '../../contexts/conversation.context';
-import { useMutation } from '@tanstack/react-query';
+// import { useMutation } from '@tanstack/react-query';
 import { createMessage, uploadImage } from '@message-management/client';
 import { SenderType } from '@message-management/types';
 import { sanitizeToTelegramHtml, toBase64FromBlob } from '@message-management/utils';
@@ -46,15 +46,15 @@ export default function Editor() {
     e.target.value = '';
   };
 
-  const createMessageMutation = useMutation({
-    mutationFn: createMessage,
-    onSuccess: () => {
-      console.log('Create message successfully');
-    },
-    onError: (error) => {
-      console.log('Create message failed: ', error);
-    },
-  });
+  // const createMessageMutation = useMutation({
+  //   mutationFn: createMessage,
+  //   onSuccess: () => {
+  //     console.log('Create message successfully');
+  //   },
+  //   onError: (error) => {
+  //     console.log('Create message failed: ', error);
+  //   },
+  // });
 
   const handleSubmit = async () => {
     if (!editor) {
@@ -90,11 +90,11 @@ export default function Editor() {
 
         // get raw binary data
         const blob = await response.blob();
-        console.log("Blob: ",blob);
+        console.log('Blob: ', blob);
 
-        const data = await uploadImage(blob)
-        console.log("Data: ",data);
-        return data.result.url
+        const data = await uploadImage(blob);
+        console.log('Data: ', data);
+        return data.result.url;
       }),
     );
 
@@ -104,15 +104,28 @@ export default function Editor() {
       return;
     }
 
-    const adminId = localStorage.getItem('id')
+    const adminId = localStorage.getItem('id');
 
-    createMessageMutation.mutate({
-      conversationId: conversationId || '',
-      senderType: SenderType.OUTGOING,
-      fileUrls,
-      content: sanitizedHtml,
-      sentByAdmin: adminId,
-    });
+    // createMessageMutation.mutate({
+    //   conversationId: conversationId || '',
+    //   senderType: SenderType.OUTGOING,
+    //   fileUrls,
+    //   content: sanitizedHtml,
+    //   sentByAdmin: adminId,
+    // });
+
+    try {
+      await createMessage({
+        conversationId: conversationId || '',
+        senderType: SenderType.OUTGOING,
+        fileUrls,
+        content: sanitizedHtml,
+        sentByAdmin: adminId,
+      });
+      console.log('Create message successfully');
+    } catch (error) {
+      console.log('Create message failed: ', error);
+    }
 
     editor.commands.clearContent();
   };

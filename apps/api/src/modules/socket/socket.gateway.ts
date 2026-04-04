@@ -1,4 +1,4 @@
-import { Conversation, Messages } from '@message-management/types';
+import { Conversation, Messages, SocketPayloadType } from '@message-management/types';
 import { UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   OnGatewayConnection,
@@ -73,6 +73,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('new_messages', {
       newMessages: messages,
     });
+  }
+
+  newSocketHandle(payload: SocketPayloadType ) {
+    this.server.emit('socket_event', {
+      meta: payload
+    })
   }
 
   // @SubscribeMessage('create_message')

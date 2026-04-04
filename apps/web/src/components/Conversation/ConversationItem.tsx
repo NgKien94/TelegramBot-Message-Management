@@ -1,6 +1,6 @@
 import { Conversation, Messages, TelegramUser, UpdateConversationRequest } from '@message-management/types';
 import { BiArchiveOut } from 'react-icons/bi';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateConversation } from '@message-management/client';
 import { toast } from 'react-toastify';
 import { MouseEvent } from 'react';
@@ -33,31 +33,38 @@ const getSenderLabel = (
 };
 
 export default function ConversationItem({ conversation, ...rest }: ConversationItemProps) {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const updateConversationMutation = useMutation({
-    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
-      updateConversation(conversationId, body),
-    onSuccess: () => {
-      toast.success('Closed conversation successfully');
-      queryClient.invalidateQueries({
-        queryKey: ['conversation-list'],
-      });
-    },
-    onError: (err) => {
-      console.log('Error when closed conversation: ', err);
-      toast.error('Closed conversation failed');
-    },
-  });
+  // const updateConversationMutation = useMutation({
+  //   mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
+  //     updateConversation(conversationId, body),
+  //   onSuccess: () => {
+  //     toast.success('Closed conversation successfully');
+  //     queryClient.invalidateQueries({
+  //       queryKey: ['conversation-list'],
+  //     });
+  //   },
+  //   onError: (err) => {
+  //     console.log('Error when closed conversation: ', err);
+  //     toast.error('Closed conversation failed');
+  //   },
+  // });
 
-  const handleClickClosed = (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
+  const handleClickClosed = async (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
     e.stopPropagation();
-    updateConversationMutation.mutate({
-      conversationId: conversation.id,
-      body: {
-        status: 'CLOSED',
-      },
-    });
+    // updateConversationMutation.mutate({
+    //   conversationId: conversation.id,
+    //   body: {
+    //     status: 'CLOSED',
+    //   },
+    // });
+    try {
+      await updateConversation(conversation.id, { status: 'CLOSED' });
+      toast.success('Closed conversation successfully');
+    } catch (error) {
+      console.log('Error when closed conversation: ', error);
+      toast.error('Closed conversation failed');
+    }
   };
 
   return (
@@ -94,8 +101,10 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
         </div>
         <div className="card-content flex justify-between items-center">
           <div className="w-full line-clamp-1 text-sm text-gray-500">
-            <span className='inline-block text-gray-500 font-medium'>{getSenderLabel(conversation.lastMessage, conversation.telegramUser)}</span>
-            <span className='inline-block ml-1'>
+            <span className="inline-block text-gray-500 font-medium">
+              {getSenderLabel(conversation.lastMessage, conversation.telegramUser)}
+            </span>
+            <span className="inline-block ml-1">
               {Boolean(conversation.lastMessage.content) === false
                 ? 'Sent photo'
                 : removeAllHTMLTagToText(conversation.lastMessage.content)}

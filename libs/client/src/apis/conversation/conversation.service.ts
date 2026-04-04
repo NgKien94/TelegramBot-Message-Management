@@ -14,6 +14,11 @@ export const getChatHistoryOfConversation = (conversationId: string) => {
   return http.get<unknown, ApiDataForClient<ChatHistoryOfConversation>>(`/conversations/${conversationId}`)
 }
 
+// export const updateConversation = (conversationId: string, body: UpdateConversationRequest) => {
+//   return http.patch<unknown,ApiDataForClient<Conversation>>(`/conversations/${conversationId}`, body)
+// }
+
+
 export const updateConversation = (conversationId: string, body: UpdateConversationRequest) => {
-  return http.patch<unknown,ApiDataForClient<Conversation>>(`/conversations/${conversationId}`, body)
+  return http.patch<unknown,ApiDataForClient<Conversation>>(`/conversations/${conversationId}/status`, body)
 }

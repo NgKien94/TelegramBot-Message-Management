@@ -2,10 +2,15 @@ import { PrismaService } from '@message-management/db';
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
 import { GetConversationDto, UpdateConversationDto } from './conversation.dto';
+import { SocketGateway } from '../socket/socket.gateway';
+import { Conversation } from '@message-management/types';
 
 @Injectable()
 export class ConversationService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly socketGateway: SocketGateway,
+  ) {}
 
   async getConversationsList(filter: GetConversationDto) {
     const conversations = await this.prismaService.conversation.findMany({
@@ -85,7 +90,7 @@ export class ConversationService {
     return newConversation;
   }
 
-  async updateConversation(conversationId: string, payload: UpdateConversationDto) {
+  async updateConversationInternal(conversationId: string, payload: UpdateConversationDto) {
     const existConversation = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId,
@@ -96,9 +101,22 @@ export class ConversationService {
       throw new NotFoundException('Conversation not found');
     }
 
-    await this.prismaService.conversation.update({
+    const updatedConversation = await this.prismaService.conversation.update({
       where: {
         id: conversationId,
+      },
+      include: {
+        telegramUser: true,
+        lastMessage: {
+          include: {
+            account: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
       data: {
         isReadByAdmin: payload.isReadByAdmin,
@@ -108,6 +126,36 @@ export class ConversationService {
         updatedAt: new Date(),
       },
     });
+
+    return updatedConversation;
+  }
+
+  async adminUpdateConversation(conversationId: string, payload: UpdateConversationDto) {
+    const updatedConversation = await this.updateConversationInternal(conversationId, payload);
+
+    // const mapped: Conversation = {
+    //   ...updatedConversation,
+    //   lastMessage: updatedConversation.lastMessage
+    //     ? {
+    //         ...updatedConversation.lastMessage,
+    //         sentByAdmin: updatedConversation.lastMessage.account ?? null,
+    //       }
+    //     : null,
+    //   lastMessageAt: updatedConversation.lastMessageAt.toISOString()
+    // };
+
+    // this.socketGateway.newSocketHandle({
+    //   messageId: updatedConversation.lastMessage.id,
+    //   isReadByAdmin: true,
+    // })
+
+    this.socketGateway.newSocketHandle({
+      message: { ...updatedConversation.lastMessage, sentByAdmin: null, createdAt: updatedConversation.lastMessage.createdAt.toISOString() },
+      conversation: updatedConversation,
+      telegramUser: updatedConversation.telegramUser,
+    });
+
+    return updatedConversation;
   }
 
   async getChatHistoryOfConversation(conversationId: string) {
@@ -142,7 +190,6 @@ export class ConversationService {
         },
       },
     });
-
 
     return {
       ...result,

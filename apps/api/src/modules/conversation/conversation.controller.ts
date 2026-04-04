@@ -17,6 +17,11 @@ export class ConversationController {
 
   @Patch(':id')
   updateConversation(@Param('id') id: string,@Body() payload: UpdateConversationDto) {
-    return this.conversationService.updateConversation(id, payload);
+    return this.conversationService.updateConversationInternal(id, payload);
+  }
+
+  @Patch(':id/status')
+  adminUpdateConversation(@Param('id') id: string,@Body() payload: UpdateConversationDto) {
+    return this.conversationService.adminUpdateConversation(id,payload)
   }
 }
