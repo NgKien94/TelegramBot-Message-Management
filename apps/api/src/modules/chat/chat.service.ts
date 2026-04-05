@@ -46,29 +46,6 @@ export class ChatService {
 
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    // old
-    // this.socketGateway.socketHandleUpdateConversation({
-    //   id: detailConversation.id,
-    //   telegramUser: detailConversation.telegramUser,
-    //   isReadByAdmin: detailConversation.isReadByAdmin,
-    //   lastMessage: {
-    //     ...detailConversation.lastMessage,
-    //     sentByAdmin: null,
-    //   },
-    //   lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-    //   status: detailConversation.status,
-    // });
-
-    // emit socket event for web frontend to realtime chat history
-
-    // old
-    // this.socketGateway.socketHandleUpdateChatHistory([
-    //   { ...userMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
-    //   { ...botMessage, sentByAdmin: null, createdAt: botMessage.createdAt.toISOString() },
-    // ]);
-
-    // new
     this.socketGateway.newSocketHandle({
       message: { ...userMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
       conversation: detailConversation,
@@ -76,9 +53,11 @@ export class ChatService {
     });
 
     this.socketGateway.newSocketHandle({
-      message: { ...botMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
-      conversation: detailConversation,
-      telegramUser: detailConversation.telegramUser,
+      message: { ...botMessage, sentByAdmin: null, createdAt: botMessage.createdAt.toISOString() },
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      },
     });
   }
 
@@ -106,31 +85,12 @@ export class ChatService {
     // get detail conversation
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    // old
-    // this.socketGateway.socketHandleUpdateConversation({
-    //   id: detailConversation.id,
-    //   telegramUser: detailConversation.telegramUser,
-    //   isReadByAdmin: detailConversation.isReadByAdmin,
-    //   lastMessage: {
-    //     ...detailConversation.lastMessage,
-    //     sentByAdmin: null,
-    //   },
-    //   lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-    //   status: detailConversation.status,
-    // });
-
-    // emit socket event for web frontend to realtime chat history
-    // old
-    // this.socketGateway.socketHandleUpdateChatHistory([
-    //   { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-    // ]);
-
-    // new
     this.socketGateway.newSocketHandle({
       message: { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-      conversation: detailConversation,
-      telegramUser: detailConversation.telegramUser,
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      }
     });
   }
 
@@ -159,31 +119,12 @@ export class ChatService {
     // get detail conversation
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    // old
-    // this.socketGateway.socketHandleUpdateConversation({
-    //   id: detailConversation.id,
-    //   telegramUser: detailConversation.telegramUser,
-    //   isReadByAdmin: detailConversation.isReadByAdmin,
-    //   lastMessage: {
-    //     ...detailConversation.lastMessage,
-    //     sentByAdmin: null,
-    //   },
-    //   lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-    //   status: detailConversation.status,
-    // });
-
-    // emit socket event for web frontend to realtime chat history
-    // old
-    // this.socketGateway.socketHandleUpdateChatHistory([
-    //   { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-    // ]);
-
-    // new
     this.socketGateway.newSocketHandle({
       message: { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-      conversation: detailConversation,
-      telegramUser: detailConversation.telegramUser,
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin,
+      }
     });
   }
 
@@ -200,36 +141,6 @@ export class ChatService {
 
     const detailConversation = await this.conversationService.getDetailConversation(message.conversationId);
 
-    // emit socket event for web frontend to realtime conversation
-    // old
-    // this.socketGateway.socketHandleUpdateConversation({
-    //   id: detailConversation.id,
-    //   telegramUser: detailConversation.telegramUser,
-    //   isReadByAdmin: detailConversation.isReadByAdmin,
-    //   lastMessage: {
-    //     ...detailConversation.lastMessage,
-    //     sentByAdmin: {
-    //       id: message.account.id,
-    //       name: message.account.name,
-    //     },
-    //   },
-    //   lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-    //   status: detailConversation.status,
-    // });
-
-    // emit socket event for web frontend to realtime chat history
-    // old
-    // this.socketGateway.socketHandleUpdateChatHistory([
-    //   {
-    //     ...message,
-    //     sentByAdmin: {
-    //       id: message.account.id,
-    //       name: message.account.name,
-    //     },
-    //     createdAt: message.createdAt.toISOString(),
-    //   },
-    // ]);
-
     // new
     this.socketGateway.newSocketHandle({
       message: {
@@ -240,8 +151,10 @@ export class ChatService {
         },
         createdAt: message.createdAt.toISOString(),
       },
-      conversation: detailConversation,
-      telegramUser: detailConversation.telegramUser,
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      },
     });
   }
 }

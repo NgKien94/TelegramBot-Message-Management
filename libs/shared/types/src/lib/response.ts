@@ -55,8 +55,9 @@ export type Conversation = {
       name: string;
     };
     senderType: string;
+    createdAt: string
   };
-  lastMessageAt: string;
+  // lastMessageAt: string;
 };
 
 export type ChatHistoryOfConversation = {
@@ -98,11 +99,21 @@ export type TelegramUser = {
 
 // ==========Socket payload type ============
 export type SocketPayloadType = {
-  message: Messages;
-  telegramUser: TelegramUser;
+  message?: Messages;
+  telegramUser?: TelegramUser;
+  conversation: {
+    id?: string;
+    status?: string;
+    isReadByAdmin?: boolean;
+  };
+};
+
+export type GetUsersResponse = {
+  telegramID: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
   conversation: {
     id: string;
-    status: string;
-    isReadByAdmin: boolean;
   };
 };

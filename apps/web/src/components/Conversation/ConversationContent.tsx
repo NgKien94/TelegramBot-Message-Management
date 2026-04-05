@@ -1,24 +1,18 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
 // import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getChatHistoryOfConversation, socket, updateConversation } from '@message-management/client';
+import {  updateConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
 
 import {
-  ApiDataForClient,
-  ChatHistoryOfConversation,
-  Conversation,
-  GetConversationRequest,
   Messages,
-  SocketPayloadType,
-  UpdateConversationRequest,
 } from '@message-management/types';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import Editor from '../Editor/Editor';
 import { formatTimestamp } from '@message-management/utils';
 import DateDivider from './DateDivider';
-import { toast } from 'react-toastify';
+import { useAppContext } from '../../contexts/global.context';
 
 const groupMessagesByDate = (messages: Messages[]) => {
   const groups: { [key: string]: { date: string; messages: Messages[] } } = {};
@@ -40,17 +34,17 @@ const groupMessagesByDate = (messages: Messages[]) => {
 };
 
 export default function ConversationContent() {
-  const conversationId = useContext(ConversationIdContext);
-  const [content, setConversationContent] = useState<ChatHistoryOfConversation | null>(null);
+  const conversationId = useContext(ConversationIdContext) || '';
+
+  const {chatHistoriesMap, loadChatHistory} = useAppContext()
+  const content = chatHistoriesMap[conversationId]
+
   const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!conversationId) return;
-
-    getChatHistoryOfConversation(conversationId)
-      .then((data) => setConversationContent(data.result))
-      .catch(() => toast.error('Failed to load users'));
-  }, [conversationId]);
+    if (!conversationId) return
+    loadChatHistory(conversationId)
+  }, [conversationId, loadChatHistory]);
 
   useEffect(() => {
     if (historyRef.current) {
@@ -58,29 +52,6 @@ export default function ConversationContent() {
     }
   }, [content]);
 
-  useEffect(() => {
-    const conversationContentHandler = (payload: { meta: SocketPayloadType }) => {
-      const hasMessageForCurrentConversation = payload.meta.message.conversationId === conversationId;
-
-      setConversationContent((prev) => {
-        if (!prev || !hasMessageForCurrentConversation) return prev;
-
-        const isDuplicate = prev.messages.some((m) => m.id === payload.meta.message.id);
-        if (isDuplicate) return prev;
-
-        return {
-          ...prev,
-          isReadByAdmin: payload.meta.conversation.isReadByAdmin,
-          messages: [...prev.messages, payload.meta.message],
-        };
-      });
-    };
-
-    socket.on('socket_event', conversationContentHandler);
-    return () => {
-      socket.off('socket_event', conversationContentHandler);
-    };
-  }, [conversationId]);
 
   // update conversation status
   useEffect(() => {
@@ -89,16 +60,8 @@ export default function ConversationContent() {
     if (content?.isReadByAdmin === false) {
       updateConversation(conversationId, {
         isReadByAdmin: true,
-        // status: 'OPEN',
       }).then(() => {
-        setConversationContent((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            isReadByAdmin: true,
-          };
-        });
+        console.log("Update isReadByAdmin successfully");
       });
     }
   }, [conversationId, content]);

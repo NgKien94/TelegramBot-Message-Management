@@ -3,7 +3,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
 import { GetConversationDto, UpdateConversationDto } from './conversation.dto';
 import { SocketGateway } from '../socket/socket.gateway';
-import { Conversation } from '@message-management/types';
 
 @Injectable()
 export class ConversationService {
@@ -133,27 +132,12 @@ export class ConversationService {
   async adminUpdateConversation(conversationId: string, payload: UpdateConversationDto) {
     const updatedConversation = await this.updateConversationInternal(conversationId, payload);
 
-    // const mapped: Conversation = {
-    //   ...updatedConversation,
-    //   lastMessage: updatedConversation.lastMessage
-    //     ? {
-    //         ...updatedConversation.lastMessage,
-    //         sentByAdmin: updatedConversation.lastMessage.account ?? null,
-    //       }
-    //     : null,
-    //   lastMessageAt: updatedConversation.lastMessageAt.toISOString()
-    // };
-
-    // this.socketGateway.newSocketHandle({
-    //   messageId: updatedConversation.lastMessage.id,
-    //   isReadByAdmin: true,
-    // })
-
     this.socketGateway.newSocketHandle({
-      message: { ...updatedConversation.lastMessage, sentByAdmin: null, createdAt: updatedConversation.lastMessage.createdAt.toISOString() },
-      conversation: updatedConversation,
-      telegramUser: updatedConversation.telegramUser,
-    });
+      conversation: {
+        id: updatedConversation.id,
+        isReadByAdmin: updatedConversation.isReadByAdmin
+      }
+    })
 
     return updatedConversation;
   }

@@ -1,4 +1,4 @@
-import { Conversation, Messages, TelegramUser, UpdateConversationRequest } from '@message-management/types';
+import { Conversation, Messages, TelegramUser } from '@message-management/types';
 import { BiArchiveOut } from 'react-icons/bi';
 // import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateConversation } from '@message-management/client';
@@ -33,31 +33,9 @@ const getSenderLabel = (
 };
 
 export default function ConversationItem({ conversation, ...rest }: ConversationItemProps) {
-  // const queryClient = useQueryClient();
-
-  // const updateConversationMutation = useMutation({
-  //   mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
-  //     updateConversation(conversationId, body),
-  //   onSuccess: () => {
-  //     toast.success('Closed conversation successfully');
-  //     queryClient.invalidateQueries({
-  //       queryKey: ['conversation-list'],
-  //     });
-  //   },
-  //   onError: (err) => {
-  //     console.log('Error when closed conversation: ', err);
-  //     toast.error('Closed conversation failed');
-  //   },
-  // });
 
   const handleClickClosed = async (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
     e.stopPropagation();
-    // updateConversationMutation.mutate({
-    //   conversationId: conversation.id,
-    //   body: {
-    //     status: 'CLOSED',
-    //   },
-    // });
     try {
       await updateConversation(conversation.id, { status: 'CLOSED' });
       toast.success('Closed conversation successfully');
@@ -93,7 +71,7 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
             {conversation.telegramUser.username || conversation.telegramUser.telegramID}
           </p>
           <p className="text-gray-500 text-sm">
-            {new Date(conversation.lastMessageAt).toLocaleDateString('en-US', {
+            {new Date(conversation.lastMessage.createdAt).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
             })}
