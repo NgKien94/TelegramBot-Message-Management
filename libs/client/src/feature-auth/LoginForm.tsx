@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { loginFormSchema, LoginFormValues } from '../apis/auth/auth.validation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+// import { useMutation } from '@tanstack/react-query';
 import { login } from '../apis/auth/auth.service';
 import { ApiErrorForClient } from '@message-management/types';
 import { AxiosError } from 'axios';
@@ -26,20 +26,30 @@ export function LoginForm() {
     defaultValues: initialValue,
   });
 
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: () => {
+  // const loginMutation = useMutation({
+  //   mutationFn: login,
+  //   onSuccess: () => {
+  //     toast.success('Login successfully');
+  //     navigate('/');
+  //   },
+  //   onError: (error: AxiosError<ApiErrorForClient>) => {
+  //     console.log('Error: ', error);
+  //     toast.error(error.response?.data.error.message || 'Login failed');
+  //   },
+  // });
+
+  const handleOnSubmitForm = async (data: LoginFormValues) => {
+    // loginMutation.mutate({ email: data.email, password: data.password });
+    console.log('Data: ', data);
+
+    try {
+      await login({ email: data.email, password: data.password });
       toast.success('Login successfully');
       navigate('/');
-    },
-    onError: (error: AxiosError<ApiErrorForClient>) => {
-      console.log('Error: ', error);
-      toast.error(error.response?.data.error.message || 'Login failed');
-    },
-  });
-
-  const handleOnSubmitForm = (data: LoginFormValues) => {
-    loginMutation.mutate({ email: data.email, password: data.password });
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorForClient>;
+      toast.error(axiosError.response?.data.error.message || 'Login failed');
+    }
   };
 
   return (
@@ -48,21 +58,12 @@ export function LoginForm() {
       method="POST"
       onSubmit={(event) => {
         event.preventDefault();
+        // handleSubmit(handleOnSubmitForm)();
         handleSubmit(handleOnSubmitForm)();
       }}
     >
-      <Input
-        label="Email"
-        type="email"
-        {...register('email')}
-        errorMessage={errors.email?.message}
-      />
-      <Input
-        label="Password"
-        type="password"
-        {...register('password')}
-        errorMessage={errors.password?.message}
-      />
+      <Input label="Email" type="email" {...register('email')} errorMessage={errors.email?.message} />
+      <Input label="Password" type="password" {...register('password')} errorMessage={errors.password?.message} />
       <button className="block w-full mt-2 rounded px-3 py-2 bg-[var(--primary-color)] text-white hover:opacity-80 transition-all duration-200 ease-linear">
         Login
       </button>

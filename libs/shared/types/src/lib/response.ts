@@ -50,19 +50,19 @@ export type Conversation = {
     id: string;
     content: string;
     type: string;
-    sentByAdmin:
-      | null
-      | {
-          id: string;
-          name: string;
-        };
+    sentByAdmin: null | {
+      id: string;
+      name: string;
+    };
     senderType: string;
+    createdAt: string
   };
-  lastMessageAt: string;
+  // lastMessageAt: string;
 };
 
 export type ChatHistoryOfConversation = {
   id: string;
+  isReadByAdmin: boolean;
   telegramUser: TelegramUser;
   messages: Messages[];
 };
@@ -74,12 +74,10 @@ export type Messages = {
   content: string | undefined;
   type: string;
   senderType: string;
-  sentByAdmin:
-    | null
-    | {
-        id: string;
-        name: string;
-      };
+  sentByAdmin: null | {
+    id: string;
+    name: string;
+  };
   conversationId: string;
   createdAt: string;
 };
@@ -97,4 +95,25 @@ export type TelegramUser = {
   username?: string;
   lastName?: string;
   avatarUrl?: string;
+};
+
+// ==========Socket payload type ============
+export type SocketPayloadType = {
+  message?: Messages;
+  telegramUser?: TelegramUser;
+  conversation: {
+    id?: string;
+    status?: string;
+    isReadByAdmin?: boolean;
+  };
+};
+
+export type GetUsersResponse = {
+  telegramID: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  conversation: {
+    id: string;
+  };
 };

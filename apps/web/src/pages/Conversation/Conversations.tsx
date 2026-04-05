@@ -11,7 +11,6 @@ const initialFilter: GetConversationRequest = {
 }
 
 export default function Conversations() {
-  // const [conversationDetail, setConversationDetail] = useState<string | undefined>(undefined);
   const {conversationId} = useParams<{conversationId?: string}>()
 
   const [filter, setFilter] = useState<GetConversationRequest>(initialFilter)

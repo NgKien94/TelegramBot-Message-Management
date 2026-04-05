@@ -1,7 +1,7 @@
 import { getMe, getWelcomeMessage, logout, updateWelcomeMessage } from '@message-management/client';
 import { Button, TextField } from '@radix-ui/themes';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef } from 'react';
+// import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -9,59 +9,86 @@ export default function Setting() {
   const navigate = useNavigate();
   const access_token = localStorage.getItem('access_token');
   const inputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
-  const { isSuccess, data } = useQuery({
-    queryKey: ['profile'],
-    queryFn: () => getMe(),
-    enabled: Boolean(access_token),
-  });
+  const [profile, setProfile] = useState<{ email: string; name: string } | null>(null);
+  const [welcomeMessage, setWelcomeMessage] = useState<{ id: string; value: string } | null>(null);
 
-  const { data: welcomeMessageData, isSuccess: getWelcomeMessageSuccess } = useQuery({
-    queryKey: ['welcome-message'],
-    queryFn: () => getWelcomeMessage(),
-    enabled: Boolean(access_token),
-  });
+  useEffect(() => {
+    if (!access_token) return;
 
-  const changeWelcomeMessageMutation = useMutation({
-    mutationFn: updateWelcomeMessage,
-    onSuccess: (data) => {
-      toast.success('Update welcome message successfully');
-      queryClient.setQueryData(['welcome-message'],{
-        result: data.result
-      })
-    },
-    onError: () => {
-      toast.error('Update welcome message failed');
-    },
-  });
+    getMe().then((data) => setProfile(data.result));
+    getWelcomeMessage().then((data) => setWelcomeMessage(data.result));
+  }, [access_token]);
 
-  const handleOnChangeWelcomeMessage = () => {
+  // const queryClient = useQueryClient();
+
+  // const { isSuccess, data } = useQuery({
+  //   queryKey: ['profile'],
+  //   queryFn: () => getMe(),
+  //   enabled: Boolean(access_token),
+  // });
+
+  // const { data: welcomeMessageData, isSuccess: getWelcomeMessageSuccess } = useQuery({
+  //   queryKey: ['welcome-message'],
+  //   queryFn: () => getWelcomeMessage(),
+  //   enabled: Boolean(access_token),
+  // });
+
+  // const changeWelcomeMessageMutation = useMutation({
+  //   mutationFn: updateWelcomeMessage,
+  //   onSuccess: (data) => {
+  //     toast.success('Update welcome message successfully');
+  //     queryClient.setQueryData(['welcome-message'],{
+  //       result: data.result
+  //     })
+  //   },
+  //   onError: () => {
+  //     toast.error('Update welcome message failed');
+  //   },
+  // });
+
+  // const handleOnChangeWelcomeMessage = () => {
+  // const newWelcomeMessageValue = inputRef.current?.value.trim();
+  // if (newWelcomeMessageValue) {
+  //   changeWelcomeMessageMutation.mutate({
+  //     message: newWelcomeMessageValue,
+  //   });
+  // }
+  // };
+
+  // const logoutMutation = useMutation({
+  //   mutationFn: (body: { token: string }) => logout(body),
+  //   onSuccess: () => {
+  //     toast.success('Logout successfully');
+  //     queryClient.clear();
+  //   },
+  //   onError: () => {
+  //     toast.error('Logout failed');
+  //   },
+  // });
+
+  const handleOnChangeWelcomeMessage = async () => {
     const newWelcomeMessageValue = inputRef.current?.value.trim();
-    if (newWelcomeMessageValue) {
-      changeWelcomeMessageMutation.mutate({
-        message: newWelcomeMessageValue,
-      });
+    if (!newWelcomeMessageValue) return;
+
+    try {
+      const data = await updateWelcomeMessage({ message: newWelcomeMessageValue });
+      setWelcomeMessage(data.result);
+      toast.success('Update welcome message successfully');
+    } catch {
+      toast.error('Update welcome message failed');
     }
   };
-
-  const logoutMutation = useMutation({
-    mutationFn: (body: { token: string }) => logout(body),
-    onSuccess: () => {
-      toast.success('Logout successfully');
-      queryClient.clear();
-    },
-    onError: () => {
-      toast.error('Logout failed');
-    },
-  });
 
   const handleLogout = async () => {
     const refresh_token = localStorage.getItem('refresh_token');
     try {
       if (refresh_token) {
         // sync with server
-        await logoutMutation.mutateAsync({ token: refresh_token });
+
+        // await logoutMutation.mutateAsync({ token: refresh_token });
+        await logout({ token: refresh_token });
+        toast.success('Logout successfully');
 
         // remove token in client storage
         localStorage.removeItem('access_token');
@@ -84,11 +111,14 @@ export default function Setting() {
           <div className="rounded-lg border bg-white">
             <div className="flex justify-between p-3 border-b">
               <span>Email</span>
-              <span className="font-medium text-gray-900">{isSuccess ? data.result.email : 'Unknown'}</span>
+              {/* <span className="font-medium text-gray-900">{isSuccess ? data.result.email : 'Unknown'}</span> */}
+              <span className="font-medium text-gray-900">{profile ? profile.email : 'Unknown'}</span>
             </div>
             <div className="flex justify-between p-3 border-b">
               <span>Name</span>
-              <span className="font-medium text-gray-900">{isSuccess ? data.result.name : 'Unknown'}</span>
+              {/* <span className="font-medium text-gray-900">{isSuccess ? data.result.name : 'Unknown'}</span> */}
+              {/* <span className="font-medium text-gray-900">Unknow</span> */}
+              <span className="font-medium text-gray-900">{profile ? profile.name : 'Unknown'}</span>
             </div>
           </div>
         </section>
@@ -98,7 +128,7 @@ export default function Setting() {
           <h2 className="mb-2 text-base font-semibold text-gray-800">Settings</h2>
 
           {/* Welcome Message */}
-          {getWelcomeMessageSuccess && (
+          {/* {getWelcomeMessageSuccess && (
             <div className="p-4 rounded-lg border bg-white divide-y mb-3">
               <p className="font-medium text-gray-800 mb-2">Welcome message</p>
               <div className="flex gap-4 justify-between items-center !border-t-0">
@@ -108,6 +138,18 @@ export default function Setting() {
                   key={welcomeMessageData?.result.id}
                   defaultValue={welcomeMessageData?.result.value ?? ''}
                 />
+                <Button size="2" variant="solid" onClick={handleOnChangeWelcomeMessage}>
+                  Apply changes
+                </Button>
+              </div>
+            </div>
+          )} */}
+
+          {welcomeMessage && (
+            <div className="p-4 rounded-lg border bg-white divide-y mb-3">
+              <p className="font-medium text-gray-800 mb-2">Welcome message</p>
+              <div className="flex gap-4 justify-between items-center !border-t-0">
+                <TextField.Root className="flex-1" ref={inputRef} key={welcomeMessage.id} defaultValue={welcomeMessage.value} />
                 <Button size="2" variant="solid" onClick={handleOnChangeWelcomeMessage}>
                   Apply changes
                 </Button>

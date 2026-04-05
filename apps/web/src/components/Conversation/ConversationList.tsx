@@ -1,16 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ConversationItem from './ConversationItem';
-import { getConversationsList, socket, updateConversation } from '@message-management/client';
 import { useEffect } from 'react';
 
 import {
-  ApiDataForClient,
   Conversation,
   GetConversationRequest,
-  UpdateConversationRequest,
 } from '@message-management/types';
 import { useNavigate } from 'react-router-dom';
-import { Loading } from '@message-management/shared/ui';
+import { useAppContext } from '../../contexts/global.context';
 
 interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
   filterCriteria: GetConversationRequest;
@@ -18,85 +15,25 @@ interface ConversationListProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export default function ConversationList({ filterCriteria, ...rest }: ConversationListProps) {
   const navigate = useNavigate();
+  const { conversationsMap, loadConversations } = useAppContext();
 
-  const queryClient = useQueryClient();
-  const updateConversationMutation = useMutation({
-    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
-      updateConversation(conversationId, body),
-    onSuccess: (_, variables) => {
-      queryClient.setQueryData(['conversation-list', filterCriteria], (oldData: ApiDataForClient<Conversation[]>) => {
-        if (!oldData) return oldData;
-        return {
-          result: oldData.result.map((conversation) => {
-            if (conversation.id === variables.conversationId) {
-              return {
-                ...conversation,
-                isReadByAdmin: variables.body.isReadByAdmin,
-              };
-            }
-            return conversation;
-          }),
-        };
-      });
-    },
-    onError: (error) => {
-      console.log('Error when mutation conversation list', error);
-    },
-  });
+  const statusKey = filterCriteria.status ?? 'ALL';
+  const key = filterCriteria.search ? `${statusKey}_search` : statusKey;
+
+  const conversations = conversationsMap[key] ?? [];
 
   useEffect(() => {
-    const handlerConversationList = (payload: { conversation: Conversation }) => {
-      const queries = queryClient.getQueryCache().findAll({ queryKey: ['conversation-list'] });
-
-      queries.forEach((query) => {
-        const status = (query.queryKey[1] as GetConversationRequest).status;
-
-        queryClient.setQueryData(query.queryKey, (oldData: ApiDataForClient<Conversation[]>) => {
-          if (!oldData) return oldData;
-
-          const filteredList = oldData.result.filter((c) => c.id !== payload.conversation.id);
-
-          if (status === payload.conversation.status) {
-            return {
-              result: [payload.conversation, ...filteredList],
-            };
-          }
-
-          return {
-            result: filteredList,
-          };
-        });
-      });
-    };
-    socket.on('conversation_updated', handlerConversationList);
-
-    return () => {
-      socket.off('conversation_updated', handlerConversationList);
-    };
-  }, [queryClient]);
-
-  const { isSuccess, isLoading, data } = useQuery({
-    queryKey: ['conversation-list', filterCriteria],
-    queryFn: () => getConversationsList(filterCriteria),
-  });
+    loadConversations(filterCriteria);
+  }, [filterCriteria, loadConversations]);
 
   const handleOnClickConversationItem = (conversation: Conversation) => () => {
     navigate(`/conversations/${conversation.id}`);
-    if (!conversation.isReadByAdmin) {
-      updateConversationMutation.mutate({
-        conversationId: conversation.id,
-        body: {
-          isReadByAdmin: true,
-        },
-      });
-    }
   };
 
   return (
     <div {...rest} className="px-3 h-screen flex flex-col space-y-2">
-      {isLoading && <Loading />}
-      {isSuccess &&
-        data.result.map((conversation) => (
+      {conversations &&
+        conversations.map((conversation) => (
           <ConversationItem
             conversation={conversation}
             onClick={handleOnClickConversationItem(conversation)}

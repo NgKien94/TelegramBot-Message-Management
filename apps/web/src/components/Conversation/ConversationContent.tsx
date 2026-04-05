@@ -1,22 +1,18 @@
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import UserCard from './UserCard';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getChatHistoryOfConversation, socket, updateConversation } from '@message-management/client';
+// import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {  updateConversation } from '@message-management/client';
 import EmptyConversation from './EmptyConversation';
 
 import {
-  ApiDataForClient,
-  ChatHistoryOfConversation,
-  Conversation,
-  GetConversationRequest,
   Messages,
-  UpdateConversationRequest,
 } from '@message-management/types';
 import { ConversationIdContext } from '../../contexts/conversation.context';
 import Editor from '../Editor/Editor';
 import { formatTimestamp } from '@message-management/utils';
 import DateDivider from './DateDivider';
+import { useAppContext } from '../../contexts/global.context';
 
 const groupMessagesByDate = (messages: Messages[]) => {
   const groups: { [key: string]: { date: string; messages: Messages[] } } = {};
@@ -38,110 +34,52 @@ const groupMessagesByDate = (messages: Messages[]) => {
 };
 
 export default function ConversationContent() {
-  const conversationId = useContext(ConversationIdContext);
+  const conversationId = useContext(ConversationIdContext) || '';
 
-  const queryClient = useQueryClient();
-  const { isSuccess, isError, data } = useQuery({
-    queryKey: ['chat-history', conversationId],
-    queryFn: () => getChatHistoryOfConversation(conversationId || ''),
-    enabled: !!conversationId,
-  });
-
-  const updateConversationMutation = useMutation({
-    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) =>
-      updateConversation(conversationId, body),
-    onSuccess: (_, variables) => {
-
-      const queries = queryClient.getQueryCache().findAll({ queryKey: ['conversation-list'] });
-
-      queries.forEach((query) => {
-        const status = (query.queryKey[1] as GetConversationRequest).status;
-
-        queryClient.setQueryData(query.queryKey, (oldData: ApiDataForClient<Conversation[]>) => {
-          if (!oldData) return oldData;
-
-          const filteredList = oldData.result.filter((c) => c.id !== variables.conversationId);
-          const currentConversation = oldData.result.find((c) => c.id === variables.conversationId);
-
-          if (currentConversation && status === 'OPEN') {
-            return {
-              result: [{ ...currentConversation, isReadByAdmin: variables.body.isReadByAdmin, status: 'OPEN' }, ...filteredList],
-            };
-          }
-
-          return {
-            result: filteredList,
-          };
-        });
-      });
-    },
-  });
+  const {chatHistoriesMap, loadChatHistory} = useAppContext()
+  const content = chatHistoriesMap[conversationId]
 
   const historyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!conversationId) return
+    loadChatHistory(conversationId)
+  }, [conversationId, loadChatHistory]);
+
   useEffect(() => {
     if (historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
-  }, [data]);
+  }, [content]);
 
+
+  // update conversation status
   useEffect(() => {
-    // console.log(queryClient.getQueryData(['chat-history', conversationId]));
-    const conversationContentHandler = (payload: { newMessages: Messages[] }) => {
-      const hasMessageForCurrentConversation = payload.newMessages.filter(
-        (item) => item.conversationId === conversationId,
-      );
+    if (!conversationId) return;
 
-      queryClient.setQueryData(
-        ['chat-history', conversationId],
-        (oldData: ApiDataForClient<ChatHistoryOfConversation>) => {
-          // in case of, websocket emit event while useQuery is fetching api
-          if (!oldData) return oldData;
-          // filter message for current conversation and replace messages array of this conversation
-          const newMessagesForCurrentConversation = payload.newMessages.filter(
-            (item) => item.conversationId === conversationId,
-          );
-
-          return {
-            ...oldData,
-            result: {
-              ...oldData.result,
-              messages: [...oldData.result.messages, ...newMessagesForCurrentConversation],
-            },
-          };
-        },
-      );
-
-      if (hasMessageForCurrentConversation.length > 0 && !hasMessageForCurrentConversation.at(-1)?.sentByAdmin) {
-        updateConversationMutation.mutate({
-          conversationId: conversationId as string,
-          body: {
-            isReadByAdmin: true,
-          },
-        });
-      }
-    };
-
-    socket.on('new_messages', conversationContentHandler);
-
-    return () => {
-      socket.off('new_messages', conversationContentHandler);
-    };
-  }, [queryClient, conversationId, updateConversationMutation]);
+    if (content?.isReadByAdmin === false) {
+      updateConversation(conversationId, {
+        isReadByAdmin: true,
+      }).then(() => {
+        console.log("Update isReadByAdmin successfully");
+      });
+    }
+  }, [conversationId, content]);
 
   const listMessages = useMemo(() => {
-    return data ? groupMessagesByDate(data.result.messages) : [];
-  }, [data]);
+    return content ? groupMessagesByDate(content.messages) : [];
+  }, [content]);
 
   return (
     <div className="w-full h-screen flex flex-col">
-      {(!conversationId || isError) && <EmptyConversation />}
-      {isSuccess && (
+      {!conversationId && <EmptyConversation />}
+      {content && (
         <>
-          <UserCard user={data.result.telegramUser} />
+          <UserCard user={content.telegramUser} />
           <div ref={historyRef} className="conversation-history p-3 overflow-auto flex-1 flex flex-col gap-5">
             {listMessages &&
               listMessages.map((item) => (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3" key={item.date}>
                   <DateDivider label={item.date} />
                   {item.messages.map((message) => (
                     <MessageBubble
@@ -151,7 +89,7 @@ export default function ConversationContent() {
                       sendTime={new Date(message.createdAt)}
                       fileUrls={message.fileUrls}
                       sentByAdmin={message.sentByAdmin}
-                      telegramUser={data.result.telegramUser}
+                      telegramUser={content.telegramUser}
                     />
                   ))}
                 </div>

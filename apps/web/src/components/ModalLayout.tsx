@@ -1,8 +1,8 @@
-import { Dispatch, MouseEvent, SetStateAction, useRef, useState } from 'react';
+import { Dispatch, MouseEvent, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Modal } from '@message-management/shared/ui';
 import { Button, Flex } from '@radix-ui/themes';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { getUsers, sendBroadcastMessage, uploadImage } from '@message-management/client';
+// import { useMutation, useQuery } from '@tanstack/react-query';
+import { sendBroadcastMessage, uploadImage } from '@message-management/client';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -12,6 +12,7 @@ import { sanitizeToTelegramHtml } from '@message-management/utils';
 import { LuImagePlus } from 'react-icons/lu';
 import Image from '@tiptap/extension-image';
 import CharacterCount from '@tiptap/extension-character-count';
+import { useAppContext } from '../contexts/global.context';
 
 interface ModalLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpenModal: boolean;
@@ -26,15 +27,14 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [charCounter, setCharCounter] = useState<number>(0);
   const adminId = localStorage.getItem('id');
+  const { users, loadUsers } = useAppContext();
 
-  const { data } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUsers(),
-    enabled: isOpenModal,
-  });
+  useEffect(()=>{
+    loadUsers();
+  },[loadUsers])
 
   const options: OptionType[] =
-    data?.result.map((item) => {
+    users.map((item) => {
       return {
         value: item.conversation.id,
         label: `${item.firstName} ${item.lastName}`,
@@ -54,15 +54,6 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     e.target.value = '';
   };
 
-  const sendBroadcastMessageMutation = useMutation({
-    mutationFn: sendBroadcastMessage,
-    onSuccess: () => {
-      toast.success('Send broadcast message successfully');
-    },
-    onError: (error) => {
-      console.log('Error: ', error);
-    },
-  });
 
   const handleOnClickSend = async (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     const text = editor.getText().trim();
@@ -92,12 +83,17 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
     }
 
     if (text) {
-      sendBroadcastMessageMutation.mutate({
-        fileUrls,
-        content: sanitizedHtml,
-        sentByAdmin: adminId as string,
-        conversationIds: selectedOption.map((item) => item.value),
-      });
+      try {
+        await sendBroadcastMessage({
+          fileUrls,
+          content: sanitizedHtml,
+          sentByAdmin: adminId as string,
+          conversationIds: selectedOption.map((item) => item.value),
+        });
+        toast.success('Send broadcast message successfully');
+      } catch (error) {
+        console.log('Error: ', error);
+      }
     }
 
     editor.commands.clearContent();
@@ -136,7 +132,6 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
           />
 
           <div className="flex flex-col text-sm flex-1 border border-gray-300 rounded-md overflow-hidden">
-
             <div className="overflow-y-auto flex-1">
               <EditorContent
                 placeholder="Write something ..."
@@ -168,7 +163,6 @@ export default function ModalLayout({ isOpenModal, setIsOpenModal }: ModalLayout
                 <ToolBar editor={editor} />
               </div>
             )}
-
           </div>
 
           <Flex gap="3">

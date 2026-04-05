@@ -1,34 +1,21 @@
 import { EyeOpenIcon, PersonIcon } from '@radix-ui/react-icons';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { getUsers, updateConversation } from '@message-management/client';
+// import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@radix-ui/themes';
-import { Loading } from '@message-management/shared/ui';
-import {  UpdateConversationRequest } from '@message-management/types';
+import { useEffect } from 'react';
+import { useAppContext } from '../../contexts/global.context';
 
 export default function Users() {
   const navigate = useNavigate();
+  const { users, loadUsers } = useAppContext();
 
-  const { isSuccess, data, isLoading } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUsers(),
-  });
-
-  const updateConversationMutation = useMutation({
-    mutationFn: ({ conversationId, body }: { conversationId: string; body: UpdateConversationRequest }) => updateConversation(conversationId, body)
-  })
-
-  const handleViewConversation = (conversation: {id: string, isReadByAdmin: boolean}) => {
-    if (!conversation.isReadByAdmin) {
-      updateConversationMutation.mutate({
-        conversationId: conversation.id,
-        body: {
-          isReadByAdmin: true,
-        },
-      });
-    }
+  const handleViewConversation = (conversation: { id: string }) => {
     navigate(`/conversations/${conversation.id}`);
   };
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   return (
     <div className="min-h-screen p-6 md:p-10">
@@ -38,30 +25,30 @@ export default function Users() {
           Management
         </p>
         <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-        {isSuccess && <p className="text-sm text-gray-400">{data.result.length} users total</p>}
+        <p className="text-sm text-gray-400">{users.length} users total</p>
       </div>
 
       {/* Table card */}
       <div className="overflow-hidden  rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {isLoading && (
+        {/* {isLoading && (
           <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
             <Loading />
           </div>
-        )}
+        )} */}
 
-        {isSuccess && (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
-                <th className="px-5 py-3.5">Telegram ID</th>
-                <th className="px-5 py-3.5">Username</th>
-                <th className="px-5 py-3.5">First name</th>
-                <th className="px-5 py-3.5">Last name</th>
-                <th className="px-5 py-3.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {data.result.map((item, i) => (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <th className="px-5 py-3.5">Telegram ID</th>
+              <th className="px-5 py-3.5">Username</th>
+              <th className="px-5 py-3.5">First name</th>
+              <th className="px-5 py-3.5">Last name</th>
+              <th className="px-5 py-3.5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {users.length > 0 &&
+              users.map((item, index) => (
                 <tr key={item.telegramID} className="group transition-colors hover:bg-[var(--primary-color)]/5">
                   {/* Avatar + ID */}
                   <td className="px-5 py-3.5">
@@ -91,6 +78,7 @@ export default function Users() {
 
                   <td className="px-5 py-3.5 text-right">
                     <button
+                      // onClick={() => handleViewConversation(item.conversation)}
                       onClick={() => handleViewConversation(item.conversation)}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--primary-color)]/30 bg-[var(--primary-color)]/5 px-3 py-1.5 text-xs font-semibold text-[var(--primary-color)] transition hover:bg-[var(--primary-color)] hover:text-white"
                     >
@@ -100,9 +88,8 @@ export default function Users() {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export class ChatService {
     });
 
     // update conversation (lastMessage)
-    await this.conversationService.updateConversation(conversation.id, {
+    await this.conversationService.updateConversationInternal(conversation.id, {
       isReadByAdmin: false, // Admin don't send message => conversation status is UNREAD
       status: ConversationStatus.OPEN,
       lastMessageId: botMessage.id,
@@ -46,24 +46,19 @@ export class ChatService {
 
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    this.socketGateway.socketHandleUpdateConversation({
-      id: detailConversation.id,
+    this.socketGateway.newSocketHandle({
+      message: { ...userMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
+      conversation: detailConversation,
       telegramUser: detailConversation.telegramUser,
-      isReadByAdmin: detailConversation.isReadByAdmin,
-      lastMessage: {
-        ...detailConversation.lastMessage,
-        sentByAdmin: null,
-      },
-      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-      status: detailConversation.status,
     });
 
-    // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([
-      { ...userMessage, sentByAdmin: null, createdAt: userMessage.createdAt.toISOString() },
-      { ...botMessage, sentByAdmin: null, createdAt: botMessage.createdAt.toISOString() },
-    ]);
+    this.socketGateway.newSocketHandle({
+      message: { ...botMessage, sentByAdmin: null, createdAt: botMessage.createdAt.toISOString() },
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      },
+    });
   }
 
   async handleTelegramUserSendTextMessage(userId: string, content: string) {
@@ -80,7 +75,7 @@ export class ChatService {
     });
 
     // update conversation
-    await this.conversationService.updateConversation(conversation.id, {
+    await this.conversationService.updateConversationInternal(conversation.id, {
       isReadByAdmin: false, // Telegram user send messages => conversation status is UNREAD
       status: ConversationStatus.OPEN,
       lastMessageId: newMessage.id,
@@ -90,23 +85,13 @@ export class ChatService {
     // get detail conversation
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    this.socketGateway.socketHandleUpdateConversation({
-      id: detailConversation.id,
-      telegramUser: detailConversation.telegramUser,
-      isReadByAdmin: detailConversation.isReadByAdmin,
-      lastMessage: {
-        ...detailConversation.lastMessage,
-        sentByAdmin: null,
-      },
-      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-      status: detailConversation.status,
+    this.socketGateway.newSocketHandle({
+      message: { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      }
     });
-
-    // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([
-      { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-    ]);
   }
 
   async handleTelegramUserSendImages(userId: string, fileUrl: string[], content?: string) {
@@ -124,7 +109,7 @@ export class ChatService {
     });
 
     // update conversation
-    await this.conversationService.updateConversation(conversation.id, {
+    await this.conversationService.updateConversationInternal(conversation.id, {
       isReadByAdmin: false, // Telegram user send messages => conversation status is UNREAD
       status: ConversationStatus.OPEN,
       lastMessageId: newMessage.id,
@@ -134,30 +119,20 @@ export class ChatService {
     // get detail conversation
     const detailConversation = await this.conversationService.getDetailConversation(conversation.id);
 
-    // emit socket event for web frontend to realtime conversation
-    this.socketGateway.socketHandleUpdateConversation({
-      id: detailConversation.id,
-      telegramUser: detailConversation.telegramUser,
-      isReadByAdmin: detailConversation.isReadByAdmin,
-      lastMessage: {
-        ...detailConversation.lastMessage,
-        sentByAdmin: null,
-      },
-      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-      status: detailConversation.status,
+    this.socketGateway.newSocketHandle({
+      message: { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin,
+      }
     });
-
-    // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([
-      { ...newMessage, sentByAdmin: null, createdAt: newMessage.createdAt.toISOString() },
-    ]);
   }
 
   async handleSendMessageToTelegramUser(messageId: string) {
     const message = await this.messageService.getMessageDetail(messageId);
 
     // update conversation
-    await this.conversationService.updateConversation(message.conversationId, {
+    await this.conversationService.updateConversationInternal(message.conversationId, {
       isReadByAdmin: true, // admin send message => conversation status is READ
       status: ConversationStatus.OPEN,
       lastMessageId: message.id,
@@ -166,25 +141,9 @@ export class ChatService {
 
     const detailConversation = await this.conversationService.getDetailConversation(message.conversationId);
 
-    // emit socket event for web frontend to realtime conversation
-    this.socketGateway.socketHandleUpdateConversation({
-      id: detailConversation.id,
-      telegramUser: detailConversation.telegramUser,
-      isReadByAdmin: detailConversation.isReadByAdmin,
-      lastMessage: {
-        ...detailConversation.lastMessage,
-        sentByAdmin: {
-          id: message.account.id,
-          name: message.account.name,
-        },
-      },
-      lastMessageAt: detailConversation.lastMessageAt.toISOString(),
-      status: detailConversation.status,
-    });
-
-    // emit socket event for web frontend to realtime chat history
-    this.socketGateway.socketHandleUpdateChatHistory([
-      {
+    // new
+    this.socketGateway.newSocketHandle({
+      message: {
         ...message,
         sentByAdmin: {
           id: message.account.id,
@@ -192,6 +151,10 @@ export class ChatService {
         },
         createdAt: message.createdAt.toISOString(),
       },
-    ]);
+      conversation: {
+        status: detailConversation.status,
+        isReadByAdmin: detailConversation.isReadByAdmin
+      },
+    });
   }
 }
