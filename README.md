@@ -1,10 +1,25 @@
 # MessageManagement
+A complete Telegram Bot management system that allows administrators to monitor all Telegram Bot conversations and respond to Telegram Users through a web dashboard
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## Telegram Bot Features:
+- Listen to all incoming messages from Telegram users
+- Record all incoming and outgoing messages to database
+- Support text messages, images files
+- Auto-reply with configurable welcome message
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Admin Dashboard Features:
+- Authentication: Admin login/logout
+- Conversation List: View all conversations with users
+- Conversation Detail: View full message history with a specific user
+- Real-time Updates: New messages appear without page refresh (WebSocket/Polling)
+- Reply as Bot: Admin can type and send messages to users as the bot
+- Search & Filter: Search conversations by username, filter by date/status
+- Message Status: Mark conversations as read/unread, resolved/pending
+- Welcome message: Admin can config the welcome message
+- Send broadcast message: Admin can send messages to all users
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## Project overview
+![alt text]({5432DAB9-B8CD-4902-ACD8-F23FE22D6FCA}.png)
 
 ## Run tasks
 
@@ -13,11 +28,15 @@ To run tasks with Nx use:
 ```sh
 npx nx <target> <project-name>
 ```
-
 For example:
 
 ```sh
 npx nx build myproject
+```
+
+To run all project with Nx use:
+```sh
+npx nx run-many -t serve -p api,web --no-tui
 ```
 
 These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
@@ -47,50 +66,9 @@ You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx 
 
 [Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Tech Stack
+- BackEnd: NestJS, Express, Telegraf, Multer, BullMQ, SocketIO (Websocket)
+- FrontEnd: ReactJS, React Router, Zod, Tiptap Editor, RadixUI, Tailwind css
+- Database & ORM: MongoDB, Redis, Prisma
+- Containerization: Docker
+- Monorepo & Build Tool: Nx
