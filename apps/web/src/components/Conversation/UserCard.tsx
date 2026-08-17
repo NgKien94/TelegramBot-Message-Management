@@ -15,7 +15,10 @@ export default function UserCard({
         src={user.avatarUrl}
         alt={`${user.lastName} ${user.firstName}`}
       />
-      <p className="text-sm font-semibold">{user.firstName}{' '}{user.lastName || ''}</p>
+      <div>
+        <p className="text-sm font-semibold">{user.firstName}{' '}{user.lastName || ''}</p>
+        <p className="text-xs text-sky-500">@{user.username || user.telegramID}</p>
+      </div>
     </div>
   );
 }

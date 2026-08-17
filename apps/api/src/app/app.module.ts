@@ -31,12 +31,12 @@ import { UploadModule } from '../modules/upload/upload.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    // BullModule.forRoot({
-    //   connection: {
-    //     host: process.env.REDIS_HOST,
-    //     port: parseInt(process.env.REDIS_PORT)
-    //   }
-    // }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT)
+      }
+    }),
     QueueModule,
     EventEmitterModule.forRoot(),
     PrismaModule,

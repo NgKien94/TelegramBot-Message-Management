@@ -11,7 +11,6 @@ export class WelcomeMessageController {
     return await this.welcomeMessageService.updateWelcomeMessage(body.message)
   }
 
-
   @Get()
   async getData() {
     return await this.welcomeMessageService.getWelcomeMessage();
