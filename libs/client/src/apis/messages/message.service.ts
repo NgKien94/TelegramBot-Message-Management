@@ -5,11 +5,11 @@ export const createMessage = (body: CreateMessageRequest) => {
   return http.post('messages', body);
 };
 
-// export const sendBroadcastMessage = (body: SendMessageBroadcastRequest) => {
-//   return http.post('broadcast/messages', body);
-// };
-
 export const sendBroadcastMessage = (body: SendMessageBroadcastRequest) => {
-  return http.post('new-broadcast/messages', body);
+  return http.post('broadcast/messages', body);
 };
+
+// export const sendBroadcastMessage = (body: SendMessageBroadcastRequest) => {
+//   return http.post('new-broadcast/messages', body);
+// };
 

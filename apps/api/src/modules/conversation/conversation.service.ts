@@ -15,14 +15,24 @@ export class ConversationService {
     const conversations = await this.prismaService.conversation.findMany({
       where: {
         status: filter.status,
-        telegramUser: {
-          username: filter.search
-            ? {
-                contains: filter.search,
-                mode: 'insensitive',
+        telegramUser: filter.search
+          ? {
+            OR: [
+              {
+                firstName: {
+                  contains: filter.search,
+                  mode: 'insensitive'
+                }
+              },
+              {
+                lastName: {
+                  contains: filter.search,
+                  mode: 'insensitive'
+                }
               }
-            : undefined,
-        },
+            ]
+          }
+          : undefined
       },
       include: {
         telegramUser: true,

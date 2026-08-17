@@ -15,10 +15,6 @@ export class CreateMessageOfQueueDto {
   @IsEnum(MessageType)
   type?: MessageType;
 
-  @IsNotEmpty()
-  @IsEnum(SenderType)
-  senderType: SenderType;
-
   @IsString()
   @IsNotEmpty()
   sentByAdmin: string;

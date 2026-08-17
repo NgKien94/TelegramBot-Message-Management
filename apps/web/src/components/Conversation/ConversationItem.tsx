@@ -15,8 +15,10 @@ const getSenderLabel = (
   message: Omit<Messages, 'fileUrls' | 'conversationId' | 'createdAt'>,
   telegramUser: TelegramUser,
 ) => {
+  const telegramFullName = telegramUser.firstName + ' ' + telegramUser.lastName;
+
   if (message.senderType === 'INCOMING') {
-    return `${telegramUser.username || telegramUser.telegramID}: `;
+    return `${telegramFullName || telegramUser.telegramID}: `;
   }
 
   if (message.sentByAdmin) {
@@ -45,6 +47,8 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
     }
   };
 
+  const telegramFullName = conversation.telegramUser.firstName + ' ' + conversation.telegramUser.lastName;
+
   return (
     <div
       {...rest}
@@ -68,7 +72,7 @@ export default function ConversationItem({ conversation, ...rest }: Conversation
               conversation.isReadByAdmin ? ' font-semibold text-gray-800' : ' text-[var(--primary-color)] font-bold',
             )}
           >
-            {conversation.telegramUser.username || conversation.telegramUser.telegramID}
+            {telegramFullName || conversation.telegramUser.telegramID}
           </p>
           <p className="text-gray-500 text-sm">
             {new Date(conversation.lastMessage.createdAt).toLocaleDateString('en-US', {
