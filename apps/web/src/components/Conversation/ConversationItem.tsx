@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { MouseEvent } from 'react';
 import clsx from 'clsx';
 import { removeAllHTMLTagToText } from '@message-management/utils';
+import { useAppContext } from '../../contexts/global.context';
 
 interface ConversationItemProps extends React.HTMLAttributes<HTMLDivElement> {
   conversation: Conversation;
@@ -35,11 +36,17 @@ const getSenderLabel = (
 };
 
 export default function ConversationItem({ conversation, ...rest }: ConversationItemProps) {
+  const { updateConversationInList } = useAppContext();
 
   const handleClickClosed = async (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
     e.stopPropagation();
     try {
-      await updateConversation(conversation.id, { status: 'CLOSED' });
+      const response = await updateConversation(conversation.id, { status: 'CLOSED' });
+      updateConversationInList({
+        ...conversation,
+        status: response.result.status,
+        isReadByAdmin: response.result.isReadByAdmin,
+      });
       toast.success('Closed conversation successfully');
     } catch (error) {
       console.log('Error when closed conversation: ', error);

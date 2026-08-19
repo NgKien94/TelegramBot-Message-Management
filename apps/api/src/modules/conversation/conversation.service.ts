@@ -145,6 +145,7 @@ export class ConversationService {
     this.socketGateway.newSocketHandle({
       conversation: {
         id: updatedConversation.id,
+        status: updatedConversation.status,
         isReadByAdmin: updatedConversation.isReadByAdmin
       }
     })

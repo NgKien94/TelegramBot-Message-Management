@@ -21,7 +21,8 @@ interface AppContextType {
   conversationsMap: Record<string, Conversation[]>; // { OPEN: [...], CLOSED: [...] }
   isConversationsLoaded?: Record<string, boolean>; // { OPEN: true, CLOSED: false }
   loadConversations: (filter: GetConversationRequest) => Promise<void>;
-  updateConversationInList?: (payload: SocketPayloadType) => void;
+  updateConversationInList: (conversation: Conversation) => void;
+  // updateConversationInList?: (payload: SocketPayloadType) => void;
 
   // chat histories
   chatHistoriesMap: Record<string, ChatHistoryOfConversation>; // {conversationId,chatHistories}
@@ -85,6 +86,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [isConversationsLoaded],
   );
 
+  const updateConversationInList = (conversation: Conversation) => {
+    setConversationsMap((prev) => {
+      const updated = { ...prev };
+
+      for (const key of Object.keys(updated)) {
+        const [statusKey, searchKey] = key.split('_');
+        const existed = updated[key].some((item) => item.id === conversation.id);
+        const remaining = updated[key].filter((item) => item.id !== conversation.id);
+
+        if (statusKey === conversation.status && (!searchKey || existed)) {
+          updated[key] = [conversation, ...remaining];
+        } else {
+          updated[key] = remaining;
+        }
+      }
+
+      return updated;
+    });
+  };
+
   const loadChatHistory = async (conversationId: string) => {
     if (isChatHistoryLoaded[conversationId]) return;
 
@@ -129,11 +150,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Don't have message => Update isReadByAdmin
         if (!payload.meta.message) {
           for (const status in updated) {
-            updated[status] = updated[status].map((c) =>
-              c.id === payload.meta.conversation.id
-                ? { ...c, isReadByAdmin: payload.meta.conversation.isReadByAdmin ?? c.isReadByAdmin }
-                : c,
-            );
+            const conversation = updated[status].find((c) => c.id === payload.meta.conversation.id);
+            if (!conversation) continue;
+
+            const remaining = updated[status].filter((c) => c.id !== conversation.id);
+            updated[status] =
+              payload.meta.conversation.status && payload.meta.conversation.status === status.split('_')[0]
+                ? [{
+                    ...conversation,
+                    status: payload.meta.conversation.status,
+                    isReadByAdmin: payload.meta.conversation.isReadByAdmin ?? conversation.isReadByAdmin,
+                  }, ...remaining]
+                : remaining;
           }
 
           return updated;
@@ -247,6 +275,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadUsers,
         conversationsMap,
         loadConversations,
+        updateConversationInList,
         chatHistoriesMap,
         loadChatHistory,
       }}
